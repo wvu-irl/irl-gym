@@ -20,7 +20,7 @@ import numpy as np
 from gymnasium import Env, spaces
 import pygame
 
-class SailingEnv(Env):
+class SailingBREnv(Env):
     """   
     Sailing in a discrete world where agent seeks to reach goal with changing wind patterns. 
     
@@ -93,7 +93,7 @@ class SailingEnv(Env):
     metadata = {"render_modes": ["plot", "print", "none"], "render_fps": 5}
 
     def __init__(self, *, seed : int = None, params : dict = None):
-        super(SailingEnv, self).__init__()
+        super(SailingBREnv, self).__init__()
         
         if "log_level" not in params:
             params["log_level"] = logging.WARNING
@@ -260,6 +260,7 @@ class SailingEnv(Env):
         for pose, goal in zip(self._state["pose"], self._params["goal"]):
             if not math.isclose(pose, goal, abs_tol=1e-3):
                 done = False
+        # done = False
         # if np.all(self._state["pose"] == self._params["goal"]):
         #     done = True        
         
@@ -304,7 +305,7 @@ class SailingEnv(Env):
             
             # if self.observation_space.contains(state):
             neighbors.append({"pose": state["pose"]})
-            actions.append(el)
+            actions.append(i)
         
         self._log.info("Actions are" + str(actions))        
         return actions, neighbors
