@@ -54,7 +54,6 @@ class AirHockeyEnv(Env):
         self._canvas = pygame.Surface(self.bounds)
         self._canvas.fill(color=(255,255,255))
         pygame.draw.rect(self._canvas,(255,0,0),(0,0,*self.bounds),width= 6)
-        print(self.goal_bounds)
         pygame.draw.rect(self._canvas,(0,0,255),self.goal_bounds)
         pygame.draw.circle(self._canvas,(255,0,0),self.hitter.pose,self.hitter.radius)
         for p in self.pucks:
@@ -80,11 +79,7 @@ class AirHockeyEnv(Env):
         self.update_physics()
         obs = self._get_obs()
         state_final = self._state
-        self.reward(state_init,action,state_final)
-       #for p in self.pucks:
-       #    if self.in_goal(p.pose) and (np.abs(p.vel) <= .01*np.ones(2,)).all():
-       #        reward += 1
-       #        terminated = True
+        reward = self.reward(state_init,action,state_final)
         if self.time > self.timeout:
             terminated = True
         return obs, reward, terminated, False, self._get_info()
@@ -126,7 +121,6 @@ class AirHockeyEnv(Env):
                                   a_min= self.hitter.radius,
                                   a_max = self.bounds - self.hitter.radius)
     def in_goal(self, poses):
-        print(poses[1::2]*self.bounds[1])
         return np.logical_and((self.goal_bounds[0][0] <= poses[::2]*self.bounds[0]) &
                               (poses[::2]*self.bounds[0] <= self.goal_bounds[0][0] + self.goal_bounds[0][1]),
                               (self.goal_bounds[1][0] <= poses[1::2]*self.bounds[1]) &
@@ -152,11 +146,10 @@ class AirHockeyEnv(Env):
             return self._state
         
     def reward(self,s0, action, s1):
-        reward = -.01
-        if self.in_goal(s1[2:(2+2*self._params["numPucks"])]).any():
-            reward += 1
-        print(reward)
-        return reward
+        if self.in_goal(s1[2:(2+2*self._params["numPucks"])]):
+            return 1
+        else:
+            return -.01
 
     def _get_info(self):
         return {}
