@@ -107,7 +107,7 @@ register(
 register(
     id='irl_gym/SailingBR-v0',
     entry_point='irl_gym.envs:SailingBREnv',
-    max_episode_steps=100 ,
+    max_episode_steps=100,
     reward_threshold = None,
     disable_env_checker=True,
     nondeterministic = True,
@@ -129,6 +129,38 @@ register(
             "prefix": current + "/plot/",
             "save_frames": False,
             "log_level": "WARNING"
+        }
+    }
+)
+
+register(
+    id='irl_gym/AirHockey-v0',
+    entry_point='irl_gym.envs:AirHockeyEnv',
+    max_episode_steps=200,
+    reward_threshold = None,
+    disable_env_checker=True,
+    nondeterministic = True,
+    order_enforce = True,
+    autoreset = False,
+    kwargs = 
+    {
+        "params":
+        {
+            "freq": 120,
+            "screenSize":[1000,1000], 
+            "timeout": 10, 
+            "hitterPose": [250,250],
+            "hitterRadius":50,
+            "hitterMass": 5 ,
+            "numPucks": 1,
+            "puckRadius": 40,
+            "puckMass": 1,
+            "obs_type": "pose",
+            "goalPose": [0,100],
+            "goalHigh": [100,800],
+            "energyLoss":0.05,
+            "friction": 0.95,
+            "maxVel": 1500
         }
     }
 )
