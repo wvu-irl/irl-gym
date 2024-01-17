@@ -150,13 +150,13 @@ register(
             "hitterPose": [250,250],
             "hitterRadius":50,
             "hitterMass": 1,
-            "numPucks": 20,
+            "numPucks": 1,
             "puckRadius": 40,
             "puckMass": 1,
             "obs_type":"pose",
             "goalPose": [0,100],
             "goalHigh": [100,800],
-            "energyLoss":0.05,
+            "energyLoss":0.5,
             "friction": 0.95,
             "maxVel": 1500
         }

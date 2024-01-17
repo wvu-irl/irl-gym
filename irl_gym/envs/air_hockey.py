@@ -80,13 +80,18 @@ class AirHockeyEnv(Env):
         for puck in self.pucks:
             self.update_puck_pose(puck)
             if np.linalg.norm(self.hitter.pose-puck.pose) < self.hitter.radius + puck.radius:
-                total_mass = (puck.mass+self.hitter.mass)
-                puck.vel = ((puck.mass-self.hitter.mass)*puck.vel + 2*self.hitter.mass*self.hitter.vel)/total_mass
-                self.update_puck_pose(puck)
+                total_radius = self.hitter.radius + puck.radius
                 d = self.hitter.pose - puck.pose
-                d_norm= np.linalg.norm(puck.pose-self.hitter.pose) 
-                if d_norm < self.hitter.radius + puck.radius:
-                    self.hitter.pose = self.hitter.pose + (self.hitter.radius+puck.radius-d_norm)*(d/d_norm)
+                d_norm = np.linalg.norm(d)
+                overlap = total_radius - d_norm
+                direction = d / d_norm
+                correction = 0.5 * overlap * direction
+
+                puck.pose -= correction
+                self.hitter.pose += correction
+
+                total_mass = (puck.mass + self.hitter.mass)
+                puck.vel = ((puck.mass - self.hitter.mass) * puck.vel + 2 * self.hitter.mass * self.hitter.vel) / total_mass
 
         for puck1, puck2 in combinations(self.pucks, 2):
             if np.linalg.norm(puck1.pose - puck2.pose) < puck1.radius + puck2.radius:
@@ -108,11 +113,10 @@ class AirHockeyEnv(Env):
         # Bounce off of wall
         for p in self.pucks:
             bounce = ~self.in_bound(p)
-            p.vel = p.vel*(2*~bounce-1)
-            p.pose = np.clip(p.pose,p.radius,self.bounds-p.radius)
-            dvBounce = np.sqrt(np.abs(p.vel)) * self._params["energyLoss"]
             if bounce.any():
-                p.vel = np.where(p.vel > 0, p.vel - dvBounce ,p.vel + dvBounce)
+                p.pose = np.clip(p.pose, p.radius, self.bounds - p.radius)
+                dvBounce = np.sqrt(np.abs(p.vel)) * self._params["energyLoss"]
+                p.vel = np.where(p.vel > 0, -dvBounce, dvBounce)
             p.vel *= self._params["friction"]
 
     def move_hitter(self,action_vel):
