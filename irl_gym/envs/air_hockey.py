@@ -5,28 +5,19 @@ import pygame
 
 class AirHockeyEnv(Env):
     metadata = {"render_modes": ["human", "rgb_array", "none"]}
-    def __init__(self,*,render_mode : str = "", params: dict) -> None:
+    def __init__(self,*,render_mode : str = "", params: dict,a = None) -> None:
         super(AirHockeyEnv,self).__init__() 
         self.time = 0 
         self._params = params 
         self.Ts = 1/params["freq"]
         self.bounds = params["screenSize"]
-        self.timeout = params["timeout"]
-        self.hitter_radius = params["hitterRadius"]
-        self.hitter_mass = params["hitterRadius"]
-        self.puck_radius = params["puckRadius"]
-        self.puck_mass = params["puckMass"]
-        self.max_vel =  params["maxVel"]
-        self.pucks = []
-        self.goal_bounds = (params["goalPose"],params["goalHigh"])
 
+        self.goal_bounds = (params["goalPose"],params["goalHigh"])
         self.render_mode = render_mode
         self.action_space = spaces.Box(-1,1, shape=(2,)) 
 
         if params["obs_type"] == "rgb_array": 
             self.observation_space = spaces.Box(0,1, shape=(*params["screenSize"],3))
-        elif params["obs_type"] == "dict":
-            self.observation_space = spaces.Box(0,1, shape=(4+4*params["numPucks"],))
         else:
             self.observation_space = spaces.Box(0,1, shape=(4+4*params["numPucks"],))
 
@@ -38,8 +29,8 @@ class AirHockeyEnv(Env):
     def reset(self, seed = None, options = None):
         np.random.seed(seed) 
         self.hitter = Puck((np.random.rand(2)*(np.array(self.bounds) - 1)),
-                        self.hitter_radius,
-                        self.hitter_mass)
+                        self._params["hitterRadius"],
+                        self._params["hitterMass"])
         self.pucks = []
         for _ in range(self._params["numPucks"]):
             in_goal = True
@@ -47,7 +38,9 @@ class AirHockeyEnv(Env):
                 pose = np.random.rand(2)*(np.array(self.bounds) - 1)
                 in_goal = self.in_goal(pose)
             self.pucks.append(Puck((np.random.rand(2)*(np.array(self.bounds) - 1)),
-                                    self.puck_radius, self.puck_mass))
+                                    self._params["puckRadius"],
+                                    self._params["puckMass"]))
+        self.render()
         return self._get_obs(), self._get_info()
      
     def render(self):
@@ -80,8 +73,6 @@ class AirHockeyEnv(Env):
         obs = self._get_obs()
         state_final = self._state
         reward = self.reward(state_init,action,state_final)
-        if self.time > self.timeout:
-            terminated = True
         return obs, reward, terminated, False, self._get_info()
 
     def update_physics(self):
@@ -97,12 +88,22 @@ class AirHockeyEnv(Env):
                 if d_norm < self.hitter.radius + puck.radius:
                     self.hitter.pose = self.hitter.pose + (self.hitter.radius+puck.radius-d_norm)*(d/d_norm)
 
-        # Bounce off pucks
         for puck1, puck2 in combinations(self.pucks, 2):
-            if np.linalg.norm(puck1.pose-puck2.pose) < puck1.radius + puck2.radius:
-               total_mass = (puck1.mass+puck2.mass)
-               puck1.vel = ((puck1.mass-puck2.mass)*puck1.vel + 2*puck2.mass*puck2.vel)/total_mass
-               puck2.vel = ((puck2.mass-puck1.mass)*puck2.vel + 2*puck1.mass*puck1.vel)/total_mass
+            if np.linalg.norm(puck1.pose - puck2.pose) < puck1.radius + puck2.radius:
+                d = puck2.pose - puck1.pose
+                d_norm = np.linalg.norm(d)
+                overlap = puck1.radius + puck2.radius - d_norm
+                direction = d / d_norm
+                correction = 0.5 * overlap * direction
+
+                puck1.pose -= correction
+                puck2.pose += correction
+
+                relative_velocity = puck2.vel - puck1.vel
+                impulse = 2 * np.dot(relative_velocity, direction) / (puck1.mass + puck2.mass) * direction
+
+                puck1.vel += impulse * puck2.mass
+                puck2.vel -= impulse * puck1.mass
 
         # Bounce off of wall
         for p in self.pucks:
@@ -124,7 +125,7 @@ class AirHockeyEnv(Env):
         return np.logical_and((self.goal_bounds[0][0] <= poses[::2]*self.bounds[0]) &
                               (poses[::2]*self.bounds[0] <= self.goal_bounds[0][0] + self.goal_bounds[0][1]),
                               (self.goal_bounds[1][0] <= poses[1::2]*self.bounds[1]) &
-                              (poses[1::2]*self.bounds[1] <= self.goal_bounds[1][0] + self.goal_bounds[1][1])).all()
+                              (poses[1::2]*self.bounds[1] <= self.goal_bounds[1][0] + self.goal_bounds[1][1]))
     def in_bound(self,puck):
         pose_in_bound = np.ones(shape=(2,),dtype = "bool")
         for xy, bound in enumerate(self.bounds):
@@ -146,10 +147,8 @@ class AirHockeyEnv(Env):
             return self._state
         
     def reward(self,s0, action, s1):
-        if self.in_goal(s1[2:(2+2*self._params["numPucks"])]):
-            return 1
-        else:
-            return -.01
+        reward = -.05 + np.sum(self.in_goal(s1[2:(2+2*self._params["numPucks"])]))/self._params["numPucks"]
+        return reward
 
     def _get_info(self):
         return {}
@@ -167,7 +166,7 @@ class AirHockeyEnv(Env):
         return vel
 
     def update_puck_pose(self, puck):
-        puck.pose = puck.pose + self.Ts*self.max_vel*puck.vel
+        puck.pose = puck.pose + self.Ts*self._params["maxVel"]*puck.vel
 
 class Puck:
     def __init__(self, pose, radius, mass):

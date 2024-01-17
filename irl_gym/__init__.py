@@ -43,7 +43,6 @@ register(
     }
 )
 
-
 register(
     id='irl_gym/GridTunnel-v0',
     entry_point='irl_gym.envs:GridTunnelEnv',
@@ -148,14 +147,13 @@ register(
         {
             "freq": 120,
             "screenSize":[1000,1000], 
-            "timeout": 10, 
             "hitterPose": [250,250],
             "hitterRadius":50,
-            "hitterMass": 5 ,
-            "numPucks": 1,
+            "hitterMass": 1,
+            "numPucks": 20,
             "puckRadius": 40,
             "puckMass": 1,
-            "obs_type": "pose",
+            "obs_type":"pose",
             "goalPose": [0,100],
             "goalHigh": [100,800],
             "energyLoss":0.05,
