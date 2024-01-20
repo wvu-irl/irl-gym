@@ -2,10 +2,15 @@ import numpy as np
 from gymnasium import Env,spaces
 from itertools import combinations
 import pygame
+import cv2
 
 class AirHockeyEnv(Env):
     metadata = {"render_modes": ["human", "rgb_array", "none"]}
-    def __init__(self,*,render_mode : str = "", params: dict,a = None) -> None:
+    def __init__(self,*,
+                 params: dict,
+                 render_mode : str = "human",
+                 obs_type : str = "state") -> None:
+
         super(AirHockeyEnv,self).__init__() 
         self.time = 0 
         self._params = params 
@@ -15,8 +20,9 @@ class AirHockeyEnv(Env):
         self.goal_bounds = (params["goalPose"],params["goalHigh"])
         self.render_mode = render_mode
         self.action_space = spaces.Box(-1,1, shape=(2,)) 
+        self.obs_type = obs_type
 
-        if params["obs_type"] == "rgb_array": 
+        if obs_type == "screen": 
             self.observation_space = spaces.Box(0,1, shape=(*params["screenSize"],3))
         else:
             self.observation_space = spaces.Box(0,1, shape=(4+4*params["numPucks"],))
@@ -40,7 +46,9 @@ class AirHockeyEnv(Env):
             self.pucks.append(Puck((np.random.rand(2)*(np.array(self.bounds) - 1)),
                                     self._params["puckRadius"],
                                     self._params["puckMass"]))
-        self.render()
+        self._terminated = False
+        if self.render_mode == "human" or self.obs_type == "screen":
+            self.render()
         return self._get_obs(), self._get_info()
      
     def render(self):
@@ -66,14 +74,15 @@ class AirHockeyEnv(Env):
 
     def step(self, action):
         reward = -.01
-        terminated = False
         state_init = self._state
         self.move_hitter(action)
         self.update_physics()
         obs = self._get_obs()
         state_final = self._state
         reward = self.reward(state_init,action,state_final)
-        return obs, reward, terminated, False, self._get_info()
+        if self.render_mode == "human" or self.obs_type == "screen":
+            self.render()
+        return obs, reward, self._terminated, False, self._get_info()
 
     def update_physics(self):
         # Bounce off Hitter
@@ -145,13 +154,23 @@ class AirHockeyEnv(Env):
                                 *(self.hitter.vel),
                                 *puck_vels],dtype = "float32")
 
-        if self._params["obs_type"] == "rgb_array":
+        if  self.obs_type == "screen":
             return pygame.surfarray.array3d(self._canvas)
         else:
             return self._state
         
     def reward(self,s0, action, s1):
-        reward = -.05 + np.sum(self.in_goal(s1[2:(2+2*self._params["numPucks"])]))/self._params["numPucks"]
+        reward = -.05 
+
+        #Reward for pucks being in the goal
+        in_goal = self.in_goal(s1[2:(2+2*self._params["numPucks"])])
+        reward += np.sum(in_goal)/self._params["numPucks"]
+
+        #Punishment for moving inside goal 
+        puck_vels = s1[4 + 2*self._params["numPucks"]:].reshape((-1,2))
+        reward -= np.sum(in_goal*np.linalg.norm(puck_vels,axis=1)**(.5))/(2*self._params["numPucks"]) 
+
+        self._terminated = (reward > .95 - 1e-2)
         return reward
 
     def _get_info(self):

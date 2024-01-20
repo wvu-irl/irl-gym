@@ -135,7 +135,7 @@ register(
 register(
     id='irl_gym/AirHockey-v0',
     entry_point='irl_gym.envs:AirHockeyEnv',
-    max_episode_steps=200,
+    max_episode_steps=1000,
     reward_threshold = None,
     disable_env_checker=True,
     nondeterministic = True,
@@ -152,8 +152,7 @@ register(
             "hitterMass": 1,
             "numPucks": 1,
             "puckRadius": 40,
-            "puckMass": 1,
-            "obs_type":"pose",
+            "puckMass": 2,
             "goalPose": [0,100],
             "goalHigh": [100,800],
             "energyLoss":0.5,
