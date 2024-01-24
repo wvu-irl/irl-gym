@@ -149,13 +149,13 @@ register(
             "screenSize":[1000,1000], 
             "hitterPose": [250,250],
             "hitterRadius":50,
-            "hitterMass": 1,
+            "hitterMass": 5,
             "numPucks": 1,
-            "puckRadius": 40,
-            "puckMass": 2,
+            "puckRadius": 35,
+            "puckMass": 1,
             "goalPose": [0,100],
             "goalHigh": [100,800],
-            "energyLoss":0.5,
+            "energyLoss":0.75,
             "friction": 0.95,
             "maxVel": 1500
         }

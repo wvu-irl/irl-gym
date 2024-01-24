@@ -8,7 +8,7 @@ class AirHockeyEnv(Env):
     metadata = {"render_modes": ["human", "rgb_array", "none"]}
     def __init__(self,*,
                  params: dict,
-                 render_mode : str = "human",
+                 render_mode : str = "rgb_array",
                  obs_type : str = "state") -> None:
 
         super(AirHockeyEnv,self).__init__() 
@@ -102,6 +102,7 @@ class AirHockeyEnv(Env):
                 total_mass = (puck.mass + self.hitter.mass)
                 puck.vel = ((puck.mass - self.hitter.mass) * puck.vel + 2 * self.hitter.mass * self.hitter.vel) / total_mass
 
+        #Puck Collisions
         for puck1, puck2 in combinations(self.pucks, 2):
             if np.linalg.norm(puck1.pose - puck2.pose) < puck1.radius + puck2.radius:
                 d = puck2.pose - puck1.pose
@@ -123,9 +124,10 @@ class AirHockeyEnv(Env):
         for p in self.pucks:
             bounce = ~self.in_bound(p)
             if bounce.any():
-                p.pose = np.clip(p.pose, p.radius, self.bounds - p.radius)
-                dvBounce = np.sqrt(np.abs(p.vel)) * self._params["energyLoss"]
-                p.vel = np.where(p.vel > 0, -dvBounce, dvBounce)
+                p_fixed = np.clip(p.pose, p.radius, self.bounds - p.radius)
+                p_diff = p_fixed - p.pose
+                p.pose =  p_fixed
+                p.vel = np.where(np.abs(p_diff) > 0, -p.vel, p.vel)*self._params["energyLoss"]
             p.vel *= self._params["friction"]
 
     def move_hitter(self,action_vel):
@@ -139,6 +141,7 @@ class AirHockeyEnv(Env):
                               (poses[::2]*self.bounds[0] <= self.goal_bounds[0][0] + self.goal_bounds[0][1]),
                               (self.goal_bounds[1][0] <= poses[1::2]*self.bounds[1]) &
                               (poses[1::2]*self.bounds[1] <= self.goal_bounds[1][0] + self.goal_bounds[1][1]))
+
     def in_bound(self,puck):
         pose_in_bound = np.ones(shape=(2,),dtype = "bool")
         for xy, bound in enumerate(self.bounds):
@@ -170,7 +173,7 @@ class AirHockeyEnv(Env):
         puck_vels = s1[4 + 2*self._params["numPucks"]:].reshape((-1,2))
         reward -= np.sum(in_goal*np.linalg.norm(puck_vels,axis=1)**(.5))/(2*self._params["numPucks"]) 
 
-        self._terminated = (reward > .95 - 1e-2)
+        self._terminated = (reward > .95 - 1e-1)
         return reward
 
     def _get_info(self):
@@ -189,12 +192,11 @@ class AirHockeyEnv(Env):
         return vel
 
     def update_puck_pose(self, puck):
-        puck.pose = puck.pose + self.Ts*self._params["maxVel"]*puck.vel
+        puck.pose = puck.pose + self.Ts*self._params["maxVel"]*np.clip(puck.vel,-1,1)
 
 class Puck:
     def __init__(self, pose, radius, mass):
-        self.init_pose = np.array(pose)
-        self.pose = self.init_pose
+        self.pose = pose
         self.vel = np.zeros(shape = (2,))
         self.radius = np.array(radius)
         self.mass = np.array(mass)
