@@ -14,7 +14,9 @@ sys.path.append(parent)
 from copy import deepcopy
 import logging
 
-__all__ = ["Assumption", "check_limits"] 
+from abc import ABC, abstractmethod
+
+__all__ = ["Assumption"] 
 
 # Modular environment
 # Assume some assumption {"type": {"name", <name>, "prop1": <>, ...}}
@@ -26,10 +28,7 @@ __all__ = ["Assumption", "check_limits"]
 # Else, if during update and value is not satisfied, do nothing or select nearest value (depends on whether or not numeric)
 
 
-
-
-
-class Assumption:
+class Assumption((ABC)):
     """
     Assumption object for controlling assumption properties
     """
@@ -37,8 +36,11 @@ class Assumption:
         self.__name = name
         
         # Raise Error if none?
-        self.__state = initial_state
+        self.__state = deepcopy(initial_state)
+        self.__default = deepcopy(initial_state)
         self.__limits = limits
+        
+        self.__alpha = 0.95
         
         if not self.check_limits():
             raise ValueError("Initial state does not satisfy limits")
@@ -56,35 +58,31 @@ class Assumption:
         if value is None:
             value = self.__state
         
+        is_in = False
         for key in self.__limits:
             if key not in value or value[key] is None:
-                return False
+                self.__state[key] = self.__default[key]
             for i, el in enumerate(self.__limits[key]):
                 if type(el) is list:
                     if value[key] >= el[0] and value[key] <= el[1]:
-                        return True
+                        is_in = True
                 elif value[key] == el:
-                    return True
-        return False
-        
-    def compute(self, s1, s2 = None):
+                    is_in = True
+        return value
+    
+    @abstractmethod
+    def compute(self, **kwargs):
         """
         Compute the assumption value
         """
         raise NotImplementedError
     
+    @abstractmethod
     def update(self, state):
         """
         Update the assumption value
         """
         raise NotImplementedError
     
-    def check_validity(self, data):
-        """
-        Check if the assumption is valid
-        
-        
-        """
-        raise NotImplementedError
     
     

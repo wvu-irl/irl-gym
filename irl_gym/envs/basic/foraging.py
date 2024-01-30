@@ -29,7 +29,8 @@ class ForagingEnv(Env):
         - "pose": [(x, y, theta), ...]
         - "battery": b
         - "has_sample": [], if empty, none, otherwise, [properties]
-        - "samples": [[x, y, properties, theta], ...]
+        - "samples": [[id, x, y, properties, theta], ...]
+        - "obstacles": [[x,y, shape]]
         
     **Observations**
     
@@ -37,13 +38,17 @@ class ForagingEnv(Env):
 
     **Actions**
     
-        - 0: move south        [ 0, -1]
-        - 1: move west         [-1,  0]
-        - 2: move north        [ 0,  1]
-        - 3: move east         [ 1,  0]
+        {
+            "is_position": bool 
+            "position": [x,y], Can discretize this as needed (assume velocity controller?)
+            "velocity": [-v_min, v_max], Can descretize this if needed
+            "grab": -1 (drop), 0 (do nothing), 1 (grab) Can't move and drop at same time.
+        }
     
     **Transition Probabilities**
 
+        - normal about forward motion and angular. 
+        in case of discrete, there will be some associated with unknown heading. -> be a function of state transition?
         - $p \qquad \qquad$ remain in place
         - $1-p \quad \quad \:$ transition to desired state
         
@@ -75,6 +80,8 @@ class ForagingEnv(Env):
     :param log_level: (str) Level of logging to use. For more info see `logging levels <https://docs.python.org/3/library/logging.html#levels>`_, *default*: "WARNING"
     """
     metadata = {"render_modes": ["plot", "print", "none"], "render_fps": 5}
+
+    # include delay as computational expense
 
     def __init__(self, *, seed : int = None, params : dict = None):
         super(GridWorldEnv, self).__init__()

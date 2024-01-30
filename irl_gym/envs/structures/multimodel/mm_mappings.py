@@ -14,6 +14,10 @@ sys.path.append(parent)
 from copy import deepcopy
 import logging
 
+#assumption mappings
+
+#foreach assumption in model to next, find mapping
+
 #Should let mappings define between different models
 
 #treat mappings as a graph, so each model should have a list of other models for which it retains a mapping
