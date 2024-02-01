@@ -39,11 +39,10 @@ class ForagingEnv(Env):
     **Actions**
     
         {
-            "is_position": bool 
-            "position": [x,y], Can discretize this as needed (assume velocity controller?)
-            "velocity": [-v_min, v_max], Can descretize this if needed
-            "grab": -1 (drop), 0 (do nothing), 1 (grab) Can't move and drop at same time.
+            a = [0 (stay), 1 (move2pos), 2 grab, 3 drop]
         }
+        in continuous case, should sample coordinates in radius or nearby points of interst?
+        
     
     **Transition Probabilities**
 

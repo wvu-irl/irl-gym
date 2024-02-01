@@ -177,6 +177,11 @@ class ModelCost(Assumption):
 
 #None assumption which always returns true and spits value back out
 
+#TODO in order
+# none assumption
+# grab/dop probabilities
+
+
 # Continuity
 # Markov Property
 
@@ -186,8 +191,19 @@ class ModelCost(Assumption):
 #obstacles
 #grab/drop probability
 #slip (linear, angular) How to deal with grid? Make random? #perhaps make this random output of  motor?
-#computational expense
 #reward
+
+# what if for continuous vs discrete, there is a graph. 
+#use regular grid + connections for interesting points
+# in continuous case, agent will simulate kinematics and dynamics
+# in discrete case, agent will simulate movement in terms of edges
+# then we can do grid density (make edges a function of nominal velocity still)
+# but then we can also do dt for continuous case
+# and actions are just all edges in radius
+# ^
+# ^
+# for slip, need slid discrete and continuous
+# for heading need discrete and continuous -> controller plays into this
 
 #termination criterion is assumption for simulator. 
  # in continuous case it could be sim_time, time_step, or terminal __state (or just reaching coordinate)
