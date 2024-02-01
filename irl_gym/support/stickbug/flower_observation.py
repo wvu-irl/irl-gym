@@ -18,7 +18,7 @@ import numpy as np
 
 from abc import ABC, abstractmethod
 
-from collisions import *
+from irl_gym.utils.collisions import *
 
 #need to add noise on visibilty and position
 

@@ -25,7 +25,7 @@ from shapely.geometry.polygon import Polygon
 
 from abc import ABC, abstractmethod
 
-from tf import *
+from irl_gym.utils.tf import *
 
 __all__ = ['BoundPoly', 'BoundBox3D', 'BoundCylinder', 'BoundSphere', 'BoundHexPrism', 'BoundEverything', 'BoundPyramid', 'BoundCamera', 'BoundCone', 'BoundRectPrism']
 

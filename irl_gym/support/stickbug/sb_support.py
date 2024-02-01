@@ -14,11 +14,11 @@ sys.path.append(parent)
 from copy import deepcopy
 import logging
 
-from collisions import BoundBox3D, BoundCylinder
+from irl_gym.utils.collisions import BoundBox3D, BoundCylinder
 
 import numpy as np
 
-from sb_arm import SBArm
+from irl_gym.support.stickbug.sb_arm import SBArm
 
 class SBSupport:
     """   

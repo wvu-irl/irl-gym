@@ -20,8 +20,8 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-from flowers import Flower
-from collisions import *
+from irl_gym.support.stickbug.flowers import Flower
+from irl_gym.utils.collisions import *
 
 __all__ = ["Flower", "Cluster", "Plant", "Row", "Orchard"]
 

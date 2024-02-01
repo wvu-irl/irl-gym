@@ -132,5 +132,29 @@ register(
         }
     }
 )
+
+register(
+    id='irl_gym/StickbugEnv-v0',
+    entry_point='irl_gym.envs:StickbugEnv',
+    max_episode_steps=100,
+    reward_threshold = None,
+    disable_env_checker=False,
+    nondeterministic = True,
+    order_enforce = True,
+    autoreset = False,
+    kwargs = 
+    {
+        "params":
+        {
+            "r_range": [-0.1,1],
+            "t_max": 100,
+            "dt": 0.1,
+            "prefix": current + "/plot/",
+            "save_frames": False,
+            "save_gif": False,
+            "log_level": "WARNING"
+        }
+    }
+)
 # print("after register")
 # [ print(env) for env in gym_envs.registry.keys() if "irl" in env ]

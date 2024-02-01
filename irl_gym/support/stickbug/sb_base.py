@@ -16,9 +16,9 @@ import logging
 
 import numpy as np
 
-from collisions import BoundHexPrism
+from irl_gym.utils.collisions import BoundHexPrism
 
-from tf import *
+from irl_gym.utils.tf import *
 
 #later should consider modelling base more directly to capture the peculiarity of the three wheel drive
 

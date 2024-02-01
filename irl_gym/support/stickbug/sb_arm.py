@@ -14,9 +14,9 @@ sys.path.append(parent)
 from copy import deepcopy
 import logging
 
-from collisions import *
-from tf import *
-from flower_observation import *
+from irl_gym.utils.collisions import *
+from irl_gym.utils.tf import *
+from irl_gym.support.stickbug.flower_observation import *
 
 import numpy as np
 

@@ -25,15 +25,15 @@ from matplotlib.animation import FuncAnimation
 
 import gymnasium as gym
 
-from collisions import *
+from irl_gym.utils.collisions import *
 
-from sb_base import SBBase
-from sb_support import SBSupport
-from spawn_flowers import *
+from irl_gym.support.stickbug.sb_base import SBBase
+from irl_gym.support.stickbug.sb_support import SBSupport
+from irl_gym.support.stickbug.spawn_flowers import *
 
 params = json.load(open(current+'/sb_params.json'))
 
-env = gym.make("stickbug/SBEnv-v0", max_episode_steps=params["max_episode_steps"], params=params)
+env = gym.make("irl_gym/StickbugEnv-v0", max_episode_steps=params["max_episode_steps"], params=params)
 env.reset()
 
 # print(type(params["base"]))

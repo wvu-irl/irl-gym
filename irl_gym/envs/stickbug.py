@@ -22,9 +22,9 @@ from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-from sb_base import SBBase
-from sb_support import SBSupport
-from sb_flowers import Orchard
+from irl_gym.support.stickbug.sb_base import SBBase
+from irl_gym.support.stickbug.sb_support import SBSupport
+from irl_gym.support.stickbug.spawn_flowers import Orchard
 
 class StickbugEnv(Env):
     """   

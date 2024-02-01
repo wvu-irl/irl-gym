@@ -18,7 +18,7 @@ import numpy as np
 
 from abc import ABC, abstractmethod
 
-from pollination import *
+from irl_gym.support.stickbug.pollination import *
 
 
 #maintain and update age. Sample age
