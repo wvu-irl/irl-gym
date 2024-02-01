@@ -1,0 +1,189 @@
+{
+    "max_episode_steps": 1000,
+    "r_range": [-0.1,1],
+    "t_max": 100,
+    "dt": 0.1,
+    "save_frames": false,
+    "save_gif": false,
+    "base":
+    {
+        "pose": [1.35,-2,0,0],
+        "velocity": [0,0,0,0],
+        "mem_offset": [0, 0.25,0],
+        "max_accel": 1,
+        "max_speed": 
+        {
+            "v": 1,
+            "w": 2
+        },
+        "pid":
+        {
+            "p": 1,
+            "i": 0.001,
+            "d": 0,
+            "db": 0.01
+        },
+        "pid_angular":
+        {
+            "p": 1,
+            "i": 0.01,
+            "d": 0,
+            "db": 0.01
+        },
+        "base_dim":
+        {
+            "radius":0.5,
+            "height":0.3
+        },
+        "log_level": "INFO"
+    },
+    "support":
+    {
+        "pose": 
+        {
+            "left": [0,0,0,0], 
+            "right": [0,0,0,0]
+        },
+        "buffer": 0.1,
+        "support_height": 2,
+        "num_arms": 6,
+        "mem_length":
+        {
+            "bicep": 0.5,
+            "forearm": 0.5
+        },
+        "joint_rest": [-2.35, 2.35],
+        "joint_constraints": 
+        {
+            "th1": 
+            {
+                "min": -2.9,
+                "max": 2.9
+            }, 
+            "th2": 
+            {
+                "min": -2.9,
+                "max": 2.9
+            },
+            "pitch": 
+            {
+                "min": -1.57,
+                "max": 1.57
+            },
+            "yaw": 
+            {
+                "min": -1.57,
+                "max": 1.57
+            }
+        },
+        "max_accel": 1,
+        "max_speed": 
+        {
+            "v": 0.1,
+            "w": 0.1
+        },
+        "pid":
+        {
+            "p": 1,
+            "i": 0.001,
+            "d": 0,
+            "db": 0.01
+        },
+        "pid_angular":
+        {
+            "p": 1,
+            "i": 0.01,
+            "d": 0,
+            "db": 0.001
+        },
+        "show_bounds": false,
+        "show_camera": true,
+        "log_level": "INFO"
+    },
+    "orchard":
+    {
+        "offset" : [2,-2,0],
+        "num_rows": 1,
+        "is_double": false,
+        "spacing": 2,
+        "log_level": "INFO"
+    },
+    "row":
+    {
+        "size": [1,10,0.25]
+    },
+    "plant":
+    {
+        "plant":
+        {
+            "height": 2,
+            "radius": 0.5,
+            "is_type": "cylinder",
+            "show_plant": true
+        },
+        "cluster":
+        {
+            "num_clusters": 3,
+            "random_num": true,
+            "cluster":
+            {
+                "random_size": true,
+                "num_flowers": 6,
+                "radius": 0.2,
+                "random_num": true,
+                "show_cluster": false
+            }
+
+        },
+        "flower":
+        {
+            "num_flowers": 10,
+            "random_num": true,
+            "flower":
+            {
+                "pollination_params":
+                {
+                    "type": "radius",
+                    "radius": 0.5,
+                    "probability": 0.9,
+                    "log_level": "INFO"
+                }
+            }
+        },
+        "log_level": "INFO"
+    },
+    "observation":
+    {
+        "type": "camera",
+        "show_camera": true,
+        "show_flowers": true,
+        "give_id": false,
+        "camera":
+        {
+            "distance":1.5,
+            "spread": [0.5,0.2],
+            "noise":
+            {
+                "pos_bias": [0,0,0],
+                "pos_cov":
+                [
+                    [0.1,0,0],
+                    [0,0.1,0],
+                    [0,0,0.1]
+                ],
+                "or_cov":
+                [
+                    [0.1,0,0],
+                    [0,0.1,0],
+                    [0,0,0.1]
+                ]
+            },
+            "obs_prob":
+            {
+                "p_max" : 0.9,
+                "d_min" : 0.1
+            }
+        }
+    }
+    
+}
