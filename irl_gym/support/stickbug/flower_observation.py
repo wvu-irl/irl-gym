@@ -69,7 +69,6 @@ class FlowerObservation(ABC):
         if "obs_prob" not in params:
             params["obs_prob"] = {"p_max": 1, "d_min": 0.1}
             
-            
         self.visible_flowers = []
         
         self._params = params

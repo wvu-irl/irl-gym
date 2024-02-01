@@ -277,12 +277,10 @@ class SBArm:
         :param dt: (float) time step
         """
         pt = np.array(point[0:3])
-        print(pt)
         pt = z_rotation(pt,self._params["pose"]["linear"],self._params["pose"]["angular"][0]-np.pi/2) - self._params["pose"]["linear"]
         pt[2] = self._params["pose"]["linear"][2]
         angles = list(self.get_joint_angles(pt))
         angles.extend(point[3:5])
-        print(angles)
         self.joint_2_position(angles,dt)
         
     def hand_2_relative_position(self,point,dt = 0.1):
@@ -451,28 +449,29 @@ class SBArm:
         :param flowers: (list) List of flowers in the environment
         :return: (dict) Dictionary containing observation
         """
-        if "dt" not in action:
-            dt = 0.1
-        else:
-            dt = action["dt"]
-        if action["is_joint"]:
-            if action["mode"] == "position":
-                self.joint_2_position(action["command"][2:7],dt)
+        if not(action is None or "command" not in action):
+            if "dt" not in action:
+                dt = 0.1
             else:
-                self.joint_2_velocity(action["command"][2:7],dt)
-        else:
-            if action["mode"] == "position" and not action["is_relative"]:
-                command = action["command"][0:3]
-                command.extend(action["command"][5:7])
-                self.hand_2_position(command,dt)
-            elif action["mode"] == "position" and action["is_relative"]:
-                command = action["command"][0:3]
-                command.extend(action["command"][5:7])
-                self.hand_2_relative_position(command,dt)
+                dt = action["dt"]
+            if action["is_joint"]:
+                if action["mode"] == "position":
+                    self.joint_2_position(action["command"][2:7],dt)
+                else:
+                    self.joint_2_velocity(action["command"][2:7],dt)
             else:
-                self.hand_2_velocity(action["command"],dt)
+                if action["mode"] == "position" and not action["is_relative"]:
+                    command = action["command"][0:3]
+                    command.extend(action["command"][5:7])
+                    self.hand_2_position(command,dt)
+                elif action["mode"] == "position" and action["is_relative"]:
+                    command = action["command"][0:3]
+                    command.extend(action["command"][5:7])
+                    self.hand_2_relative_position(command,dt)
+                else:
+                    self.hand_2_velocity(action["command"],dt)
             
-        pol_flowers = None
+        pol_flowers = []
         if "pollinate" in action and action["pollinate"]:
             pol_flowers = self.pollinate_flowers(flowers)
         
@@ -495,7 +494,7 @@ class SBArm:
         :param flowers: (list) List of flowers in the environment
         :return: (list) Flower that were pollinated
         """
-        pos = self._global_pose["hand"]
+        pos = list(self._global_pose["hand"])
         pos.append(-self._params["pose"]["angular"][0]+np.sum(self._params["pose"]["angular"][1:4]))
         pos.append(self._params["pose"]["angular"][4])
         for flower in flowers:
@@ -503,6 +502,6 @@ class SBArm:
             if flower.is_pollinated:
                 position, orientation, _ = deepcopy(flower.get_pose())
                 return {"position": position, "orientation": orientation}
-        return None
+        return {}
             
     #for pollinate need to pass in and update true flowers

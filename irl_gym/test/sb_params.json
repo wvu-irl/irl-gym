@@ -144,14 +144,14 @@
         },
         "flower":
         {
-            "num_flowers": 10,
+            "num_flowers": 25,
             "random_num": true,
             "flower":
             {
                 "pollination_params":
                 {
                     "type": "radius",
-                    "radius": 0.5,
+                    "radius": 0.01,
                     "probability": 0.9,
                     "log_level": "INFO"
                 }

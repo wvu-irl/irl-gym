@@ -230,6 +230,10 @@ class SBSupport:
         :param flowers: (list) List of flowers in the environment. *default*: []
         """
         self._log.debug("Stepping")
+        
+        for key in self._arm_names:
+            if key not in action:
+                action[key] = {}
             
         arm_poses = {}
         arm_flowers = {}
@@ -237,9 +241,9 @@ class SBSupport:
         for key in action:
             act = action[key]
             act["dt"] = dt
-            pos, flowers, pol_flowers = self._arms[key].step(act, flowers)
+            pos, obs_flowers, pol_flowers = self._arms[key].step(act, flowers)
             arm_poses[key] = pos
-            arm_flowers[key] = flowers
+            arm_flowers[key] = obs_flowers
             arm_pollinated[key] = pol_flowers
         
         self.arm_flowers = arm_flowers

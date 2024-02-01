@@ -402,7 +402,7 @@ class Row():
             if point is None or radius is None:
                 flowers.extend(plant.get_flowers())
             else:
-                dist = np.linalg.norm(np.array(plant.get_pose()[0])-np.array(point))
+                dist = np.linalg.norm(np.array(plant.get_pose())-np.array(point))
                 if dist <= radius:
                     flowers.extend(plant.get_flowers())
                 

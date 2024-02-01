@@ -45,13 +45,15 @@ while not done and plt.fignum_exists(env.get_fignum()):
                   "command":[0.1,0.1,0.1,0.1,0.1,0.1,0.1],
                   "is_joint": False,
                   "is_relative": False,
-                  "pollinate":False}
+                  "pollinate":True}
           }#, "TL": {"hand": {"position"
     s, r, done, is_trunc, _ = env.step(a)
     # print(s, r)
-    plt.pause(1)
+    
     env.render()
-    # print()
+    plt.pause(0.5)
+
+    print(_)
     # print(env.get_actions(s))
     
     done = done or is_trunc

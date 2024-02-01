@@ -196,13 +196,16 @@ class StickbugEnv(Env):
         self._num_pol_prev = 0
         self._num_flowers, self._num_pollinated = self._orchard.count_flowers()
 
-        if hasattr(self, "_fig"):
-            plt.close(self._fig)
-        plt.style.use('dark_background')
-        self._fig = plt.figure(figsize=(10, 8), facecolor='black')
-        self._ax = Axes3D(self._fig, auto_add_to_figure=False)
-        self._fig.add_axes(self._ax)
-        self._fn = self._fig.number
+        
+        if options["render"] == "plot":
+            if hasattr(self, "_fig"):   
+                plt.close(self._fig)
+            plt.style.use('dark_background')
+            self._fig = plt.figure(figsize=(10, 8), facecolor='black')
+            self._ax = Axes3D(self._fig, auto_add_to_figure=False)
+            self._fig.add_axes(self._ax)
+            self._fn = self._fig.number
+          
         # self.observation_space = spaces.discrete.Discrete(4)
         # self.action_space = spaces.Dict(
         #     {
@@ -330,6 +333,16 @@ class StickbugEnv(Env):
             self._ax.set_zlabel('Z-axis', color='white')
             self._ax.set_zlim(self._params["render_bounds"]["z"][0],self._params["render_bounds"]["z"][1])
             self._ax.set_title('Stickbug Arm Behavior Simulator', color='white')
+            
+            for armkey in self._state["flowers"]:
+                arm = self._state["flowers"][armkey]
+                for i in range(len(arm)):
+                    self._ax.scatter(arm[i]["position"][0], arm[i]["position"][1], arm[i]["position"][2], color='black', marker='o')
+                    
+            for armkey in self._state["pollinated"]:
+                arm = self._state["pollinated"][armkey]
+                if arm:
+                    self._ax.scatter(arm["position"][0], arm["position"][1], arm["position"][2], color='red', marker='o')
             
         if self._params["save_frames"]:
             plt.savefig(self._params["prefix"] + "img" + str(self._img_count) + ".png")

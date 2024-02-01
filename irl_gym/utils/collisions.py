@@ -113,8 +113,8 @@ class BoundBox3D(BoundPoly):
         ax.plot_surface(xx, np.full_like(xx, y[0]), zz, color="b", alpha=0.1)
         ax.plot_surface(xx, np.full_like(xx, y[1]), zz, color="b", alpha=0.1)
 
-        if plot:
-            plt.show()
+        # if plot:
+        #     plt.show()
 
     def contains(self, point):
         return all(self.box_min[i] <= point[i] <= self.box_max[i] for i in range(len(point)))
@@ -165,8 +165,8 @@ class BoundCylinder(BoundPoly):
             self.sphere = BoundSphere(z, self.radius)
             self.sphere.plot(fig, ax, plot=False)
 
-        if plot:
-            plt.show()
+        # if plot:
+        #     plt.show()
 
     def contains(self, point):
         if self.end_sphere:
@@ -226,8 +226,8 @@ class BoundSphere(BoundPoly):
         z = self.radius*np.cos(v) + self.center[2]
         ax.plot_surface(x, y, z, color="r", alpha=0.1)
 
-        if plot:
-            plt.show()
+        # if plot:
+        #     plt.show()
 
     def contains(self, point):
         point = np.array(point)
