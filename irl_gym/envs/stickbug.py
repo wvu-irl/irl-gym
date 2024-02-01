@@ -30,6 +30,8 @@ class StickbugEnv(Env):
     """   
     Environment for modelling stickbug. 
     
+    Due to the nature of action and observation space, env_checker has been disabled for this environment.
+    
     For more information see `gym.Env docs <https://gymnasium.farama.org/api/env/>`_
         
     **States** (dict)
@@ -94,6 +96,7 @@ class StickbugEnv(Env):
     :param dt: (float) time step, *default*: 0.1
     :param prefix: (string) where to save images, *default*: "<cwd>/plot"
     :param render: (str) render mode, *default*: "plot"
+    :param render_bounds: (dict) bounds for rendering, *default*: {"x": [-5, 5], "y": [-5, 5], "z": [0, 5]}
     :param save_frames: (bool) save images for gif, *default*: False
     :param save_gif: (bool) save gif, *default*: False
     :param log_level: (str) Level of logging to use. For more info see `logging levels <https://docs.python.org/3/library/logging.html#levels>`_, *default*: "WARNING"
@@ -114,9 +117,10 @@ class StickbugEnv(Env):
         self._log.debug("Init Stickbug Env")
         
         self._params = {}
+        self._state = {}
         self._state, _ = self.reset(seed=seed, options=params) 
         
-    def reset(self, *, seed : int = None, options : dict = None):
+    def reset(self, *, seed : int = None, options : dict = {}):
         """
         Resets environment to initial state and sets RNG seed.
         
@@ -128,7 +132,9 @@ class StickbugEnv(Env):
         
         :return: (tuple) State Observation, Info
         """
-        
+        if not options:
+            options = deepcopy(self._params)
+            
         if "base" not in options:
             options["base"] = {"log_level": options["log_level"]}
             self._log.warning("No base parameters found, using defaults")
@@ -138,8 +144,8 @@ class StickbugEnv(Env):
         if "orchard" not in options:
             options["orchard"] = {"log_level": options["log_level"]}
             self._log.warning("No orchard parameters found, using defaults")
-        if "rows" not in options:
-            options["rows"] = {"log_level": options["log_level"]}
+        if "row" not in options:
+            options["row"] = {"log_level": options["log_level"]}
             self._log.warning("No rows parameters found, using defaults")
         if "plant" not in options:
             options["plant"] = {"log_level": options["log_level"]}
@@ -147,9 +153,20 @@ class StickbugEnv(Env):
         if "observation" not in options:
             options["observation"] = {"log_level": options["log_level"]}
             self._log.warning("No observation parameters found, using defaults")
-        if "flowers" not in options:
-            options["flowers"] = {}
+        if "flower" not in options:
+            options["flower"] = {}
             self._log.warning("No flowers parameters found, using defaults")
+        
+        if "log_level" not in options["base"]:
+            options["base"]["log_level"] = options["log_level"]
+        if "log_level" not in options["support"]:
+            options["support"]["log_level"] = options["log_level"]
+        if "log_level" not in options["orchard"]:
+            options["orchard"]["log_level"] = options["log_level"]
+        if "log_level" not in options["row"]:
+            options["row"]["log_level"] = options["log_level"]
+        if "log_level" not in options["plant"]:
+            options["plant"]["log_level"] = options["log_level"]
         
         if "r_range" not in options:
             options["r_range"] = (-0.01, 1)
@@ -159,6 +176,8 @@ class StickbugEnv(Env):
             options["dt"] = 0.1
         if "render" not in options:
             options["render"] = "plot"
+        if "render_bounds" not in options:
+            options["render_bounds"] = {"x": [-5, 5], "y": [-5, 5], "z": [0, 5]}
         if "save_frames" not in options:
             options["save_frames"] = False
         if "prefix" not in options:
@@ -168,19 +187,28 @@ class StickbugEnv(Env):
             
         self._params = options
         self._seed = seed
-        
+                
         self._base = SBBase(options["base"])
         self._support = SBSupport(options["support"], options["observation"])
-        self._orchard = Orchard(options["orchard"], options["rows"], options["plant"], options["flowers"])
+        self._orchard = Orchard(options["orchard"], options["row"], options["plant"])
         
         self._t = 0
         self._num_pol_prev = 0
         self._num_flowers, self._num_pollinated = self._orchard.count_flowers()
-        
+
+        if hasattr(self, "_fig"):
+            plt.close(self._fig)
+        plt.style.use('dark_background')
         self._fig = plt.figure(figsize=(10, 8), facecolor='black')
         self._ax = Axes3D(self._fig, auto_add_to_figure=False)
         self._fig.add_axes(self._ax)
         self._fn = self._fig.number
+        # self.observation_space = spaces.discrete.Discrete(4)
+        # self.action_space = spaces.Dict(
+        #     {
+        #         "pose": spaces.box.Box(low=np.zeros(2), high=np.array(self._params["dimensions"])-1, dtype=int)
+        #     }
+        # )
                 
         return self._get_obs(), self._get_info()
     
@@ -200,6 +228,7 @@ class StickbugEnv(Env):
             a["dt"] = self._params["dt"]
 
         base_pose = self._base.step(a["base"], a["dt"])
+        self._state["base"] = {}
         self._state["base"]["pose"] = base_pose.pop("pose")
         self._state["base"]["velocity"] = base_pose.pop("velocity")
         
@@ -237,6 +266,7 @@ class StickbugEnv(Env):
         :param s: (State) state from which to get actions
         :return: (dict) Range of actions, neighbors
         """
+        # make spit out out the bounding box on actions
         raise NotImplementedError
     
     def _get_obs(self):
@@ -254,11 +284,9 @@ class StickbugEnv(Env):
         
         :return: (dict)
         """
-        #probably want to get number of flowers pollinated and time ellapsed
-        raise NotImplementedError
-        # information = {"distance": np.linalg.norm(self._state["pose"] - self._params["goal"])}
-        # self._log.debug("Get Info: " + str(information))
-        # return information
+        information = {"n_flowers": self._num_flowers, "n_pollinated": self._num_pollinated, "time": self._t}
+        self._log.debug("Get Info: " + str(information))
+        return information
     
     def reward(self, s : dict, a : int = None, sp : dict = None):
         """
@@ -290,21 +318,18 @@ class StickbugEnv(Env):
         self._log.debug("Render " + self._params["render"])
 
         if self._params["render"] == "plot":
-            orchard.plot(fig,ax,plot=False)
-            base.plot(fig,ax,plot=False)
-            support.plot(fig,ax,plot=False)
-
-            lim = 5 # need to autogen this in the future
+            self._ax.clear()
+            self._orchard.plot(self._fig,self._ax,plot=False)
+            self._base.plot(self._fig,self._ax,plot=False)
+            self._support.plot(self._fig,self._ax,plot=False)
             
-            fig.set_facecolor('black')
-            ax.set_xlabel('X-axis', color='white')
-            ax.set_xlim([-lim,2*lim])
-            ax.set_ylabel('Y-axis', color='white')
-            ax.set_ylim([-lim,2*lim])
-            ax.set_zlabel('Z-axis', color='white')
-            ax.set_zlim([0,lim])
-            ax.set_title('Stickbug Arm Behavior Simulator', color='white')
-            plt.pause(0.01)
+            self._ax.set_xlabel('X-axis', color='white')
+            self._ax.set_xlim(self._params["render_bounds"]["x"][0],self._params["render_bounds"]["x"][1])
+            self._ax.set_ylabel('Y-axis', color='white')
+            self._ax.set_ylim(self._params["render_bounds"]["y"][0],self._params["render_bounds"]["y"][1])
+            self._ax.set_zlabel('Z-axis', color='white')
+            self._ax.set_zlim(self._params["render_bounds"]["z"][0],self._params["render_bounds"]["z"][1])
+            self._ax.set_title('Stickbug Arm Behavior Simulator', color='white')
             
         if self._params["save_frames"]:
             plt.savefig(self._params["prefix"] + "img" + str(self._img_count) + ".png")
@@ -315,3 +340,11 @@ class StickbugEnv(Env):
         Converts images to gif
         """
         os.system("convert -delay 10 -loop 0 " + self._params["prefix"] + "img*.png " + self._params["prefix"] + "img.gif")
+
+    def get_fignum(self):
+        """
+        Gets figure number
+        
+        :return: (int) figure number
+        """
+        return self._fn

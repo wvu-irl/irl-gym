@@ -433,7 +433,7 @@ class Row():
             temp, temp_pollinated = plant.count_flowers()
             total += temp
             total_pollinated += temp_pollinated
-        return total   
+        return total , total_pollinated 
 
 class Orchard():
     def __init__(self,params=None, row_params = None, plant_params = None):
@@ -490,7 +490,7 @@ class Orchard():
         """
         Generates the orchard
         """
-        if len(self._params["row"]) == 0:
+        if not self._params["row"]:
             self._params["row"]["size"] = [2*self._params["plant"]["plant"]["radius"],2*self._params["plant"]["plant"]["radius"],0]
             self._params["row"]["num_plants"] = 1
             

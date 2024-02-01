@@ -3,11 +3,18 @@
     "r_range": [-0.1,1],
     "t_max": 100,
     "dt": 0.1,
+    "render_bound":
+    {
+        "x": [-5,5],
+        "y": [-5,5],
+        "z": [0,5]
+    },
+    "render": "plot",
     "save_frames": false,
     "save_gif": false,
     "base":
     {
-        "pose": [1.35,-2,0,0],
+        "pose": [1.35,-5,0,0],
         "velocity": [0,0,0,0],
         "mem_offset": [0, 0.25,0],
         "max_accel": 1,
@@ -102,7 +109,7 @@
     },
     "orchard":
     {
-        "offset" : [2,-2,0],
+        "offset" : [2,-5,0],
         "num_rows": 1,
         "is_double": false,
         "spacing": 2,

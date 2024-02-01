@@ -138,7 +138,7 @@ register(
     entry_point='irl_gym.envs:StickbugEnv',
     max_episode_steps=100,
     reward_threshold = None,
-    disable_env_checker=False,
+    disable_env_checker=True,
     nondeterministic = True,
     order_enforce = True,
     autoreset = False,
