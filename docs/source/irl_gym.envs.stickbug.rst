@@ -13,7 +13,7 @@ For a sample please check the Github file `sb_params.json <https://github.com/wv
 
 Additionally be mindful that the observations will pass back whether a flower was pollinated. In the future this may be made partially observable.
 
-contents
+Contents
 ---------
 
 .. toctree::
