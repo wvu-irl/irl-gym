@@ -4,5 +4,5 @@ pygame
 sphinx==5.1.1
 sphinx_math_dollar
 sphinx-rtd-theme
-mpl_toolkits
+matplotlib
 -e.

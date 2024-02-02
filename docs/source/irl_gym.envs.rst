@@ -7,21 +7,21 @@ Submodules
 Stickbug
 --------
 
-For full documentation, see the:ref:`stickbug-landing<Stickbug documentation>`.
+For full documentation, see the :ref:`stickbug-landing<Stickbug documentation>`.
 
-
-Grid Tunnel
------------
-
-.. automodule:: irl_gym.envs.grid_tunnel
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Grid World
 ----------
 
 .. automodule:: irl_gym.envs.grid_world
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Grid Tunnel
+-----------
+
+.. automodule:: irl_gym.envs.grid_tunnel
    :members:
    :undoc-members:
    :show-inheritance:
@@ -34,7 +34,13 @@ Sailing
    :undoc-members:
    :show-inheritance:
 
+Sailing Broken Rudder
+---------------------
 
+.. automodule:: irl_gym.envs.sailing_broken_rudder
+   :members:
+   :undoc-members:
+   :show-inheritance:
 
 Module contents
 ---------------
