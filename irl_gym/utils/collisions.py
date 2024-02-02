@@ -31,23 +31,46 @@ __all__ = ['BoundPoly', 'BoundBox3D', 'BoundCylinder', 'BoundSphere', 'BoundHexP
 
 class BoundPoly(ABC):
     def __init__(self, *args, **kwargs):
+        """
+        Abstract class for a bounded polygon
+        """
         pass
     
     @abstractmethod
     def plot(self, fig, ax, plot):
+        """
+        Plot the polygon
+        """
         raise 
     
     @abstractmethod
     def contains(self, point):
+        """
+        Check if a point is contained within the polygon
+        """
         raise
     
 
 class BoundRectPrism(BoundPoly):
     def __init__(self, corner, dimensions):
+        """
+        Create a rectangular prism with a corner and dimensions
+        
+        :param corner: [x, y, z] corner of the prism
+        :param dimensions: [x, y, z] dimensions of the prism
+        """
         self.corner = np.array(corner)
         self.dimensions = np.array(dimensions)
         
     def plot(self, fig, ax, plot, color = "b"):
+        """
+        Plot the rectangular prism
+        
+        :param fig: (fig) figure to plot on
+        :param ax: (axis) axis to plot on
+        :param plot: (plt) whether to show the plot
+        :param color: (str) color of the prism
+        """
         
         rectangle = []
         
@@ -73,11 +96,25 @@ class BoundRectPrism(BoundPoly):
             ax.add_collection3d(Poly3DCollection([rect], color=color, alpha=0.1))
             
     def contains(self, point):
+        """
+        check if a point is contained within the prism (not Implemented)
+        
+        :param point: (np.array) point to check
+        :return: (bool) whether the point is contained
+        """
         # return super().contains(point)
-        pass
+        raise NotImplementedError("Not implemented")
 
 class BoundBox3D(BoundPoly):
     def __init__(self, p1, p2, p3, buffer=0.1):
+        """
+        Create a 3D box with 3 points with buffer
+        
+        :param p1: (np.array) first point
+        :param p2: (np.array) second point
+        :param p3: (np.array) third point
+        :param buffer: (float) buffer around the box
+        """
         self.p1 = np.array(p1)
         self.p2 = np.array(p2)
         self.p3 = np.array(p3)
@@ -95,6 +132,13 @@ class BoundBox3D(BoundPoly):
         self.box_max[2] += buffer
 
     def plot(self, fig, ax,plot):
+        """
+        Plot the box
+        
+        :param fig: (fig) figure to plot on
+        :param ax: (axis) axis to plot on
+        :param plot: (plt) whether to show the plot
+        """
         # Define edges of the box
         x = [self.box_min[0], self.box_max[0]]
         y = [self.box_min[1], self.box_max[1]]
@@ -117,10 +161,26 @@ class BoundBox3D(BoundPoly):
         #     plt.show()
 
     def contains(self, point):
+        """
+        Check if a point is contained within the box
+        
+        :param point: (np.array) point to check
+        :return: (bool) whether the point is contained
+        """
         return all(self.box_min[i] <= point[i] <= self.box_max[i] for i in range(len(point)))
 
 # use x, z rotations to get points on xy plane. Subtract center from both points. Then rotate to consisten plane
 class BoundCylinder(BoundPoly):
+    """
+    Create a cylinder with a center, radius, height, and rotations
+    
+    :param center: (np.array) center of the cylinder
+    :param radius: (float) radius of the cylinder
+    :param height: (float) height of the cylinder
+    :param y_rot: (float) rotation about the y-axis (rad)
+    :param z_rot: (float) rotation about the z-axis (rad)
+    :param end_sphere: (bool) whether to add a sphere to the end of the cylinder
+    """
     def __init__(self, center, radius, height, y_rot = 0, z_rot = 0, end_sphere = False):
         self.center = np.array(center)
         self.radius = radius
@@ -130,6 +190,14 @@ class BoundCylinder(BoundPoly):
         self.end_sphere = end_sphere
 
     def plot(self, fig, ax, plot, color="r"):
+        """
+        Plot the cylinder
+        
+        :param fig: (fig) figure to plot on
+        :param ax: (axis) axis to plot on
+        :param plot: (plt) whether to show the plot
+        :param color: (str) color of the cylinder
+        """
         z = np.linspace(self.center[2], self.center[2] + self.height, 5)
         th = np.linspace(0, 2*np.pi, 50)
         th_grid, z_grid = np.meshgrid(th, z)
@@ -169,6 +237,12 @@ class BoundCylinder(BoundPoly):
         #     plt.show()
 
     def contains(self, point):
+        """
+        Check if a point is contained within the cylinder (and end sphere)
+        
+        :param point: (np.array) point to check
+        :return: (bool) whether the point is contained
+        """
         if self.end_sphere:
             z = deepcopy(self.center)
             z[2] += self.height
@@ -215,10 +289,23 @@ class BoundCylinder(BoundPoly):
     
 class BoundSphere(BoundPoly):
     def __init__(self, center, radius):
+        """
+        Create a sphere with a center and radius
+        
+        :param center: (np.array) center of the sphere
+        :param radius: (float) radius of the sphere
+        """
         self.center = np.array(center)
         self.radius = radius
 
     def plot(self, fig, ax, plot):
+        """
+        Plot the sphere
+        
+        :param fig: (fig) figure to plot on
+        :param ax: (axis) axis to plot on
+        :param plot: (plt) whether to show the plot
+        """
         # u, v = np.mgrid[0:2*np.pi:20j, 0:np.pi:10j]
         u, v = np.mgrid[0:2*np.pi:10j, 0:np.pi:5j]
         x = self.radius*np.cos(u)*np.sin(v) + self.center[0]
@@ -230,6 +317,12 @@ class BoundSphere(BoundPoly):
         #     plt.show()
 
     def contains(self, point):
+        """
+        Check if a point is contained within the sphere
+        
+        :param point: (np.array) point to check
+        :return: (bool) whether the point is contained
+        """
         point = np.array(point)
         dist = np.sqrt((point[0] - self.center[0])**2 + (point[1] - self.center[1])**2 + (point[2] - self.center[2])**2)
         return dist <= self.radius
@@ -237,9 +330,25 @@ class BoundSphere(BoundPoly):
     
 class BoundHexPrism(BoundPoly):
     def __init__(self, center, radius, height, heading):
+        """
+        Create a hexagonal prism with a center, radius, height, and heading
+        
+        :param center: (np.array) center of the hexagonal prism
+        :param radius: (float) radius of the hexagonal prism
+        :param height: (float) height of the hexagonal prism
+        :param heading: (float) heading of the hexagonal prism
+        """
         self.update(center=center, radius=radius, height=height, heading=heading)
         
     def update(self, *, center = None, radius = None, height = None, heading= None):
+        """
+        Update the hexagonal prism parameters
+        
+        :param center: (np.array) center of the hexagonal prism
+        :param radius: (float) radius of the hexagonal prism
+        :param height: (float) height of the hexagonal prism
+        :param heading: (float) heading of the hexagonal prism
+        """
         if center is not None:
             self.center = np.array(center)
         if radius is not None:
@@ -251,6 +360,9 @@ class BoundHexPrism(BoundPoly):
         self.get_points()
             
     def get_points(self):
+        """
+        Get the 2D and 3D corners of the hexagonal prism
+        """
         pts_low = []
         pts_high = []
         pts_2d = []
@@ -264,6 +376,13 @@ class BoundHexPrism(BoundPoly):
         return pts_2d
         
     def plot(self, fig, ax, plot):
+        """
+        Plot the hexagonal prism
+        
+        :param fig: (fig) figure to plot on
+        :param ax: (axis) axis to plot on
+        :param plot: (plt) whether to show the plot
+        """
         ax.add_collection3d(Poly3DCollection([self.pts_low], color="g", alpha=0.1))
         ax.add_collection3d(Poly3DCollection([self.pts_high], color="g", alpha=0.1))
         
@@ -282,6 +401,12 @@ class BoundHexPrism(BoundPoly):
             plt.show()
             
     def contains(self, point):
+        """
+        Check if a point is contained within the hexagonal prism
+        
+        :param point: (np.array) point to check
+        :return: (bool) whether the point is contained
+        """
         
         point = Point(point[0],point[1])
         polygon = Polygon(self.pts_2d)
@@ -293,16 +418,33 @@ class BoundHexPrism(BoundPoly):
         
 class BoundEverything(BoundPoly):
     def __init__(self, *args, **kwargs):
+        """
+        Bound everything
+        """
         pass
     
     def plot(self, fig, ax, plot):
+        """
+        Nothing to plot
+        """
         pass 
     
     def contains(self, point):
+        """
+        Returns true for everything
+        """
         return True
     
 class BoundPyramid(BoundPoly):
     def __init__(self, center, spread, distance, orientation):
+        """
+        Bound a pyramid with a center, spread, distance, and orientation
+        
+        :param center: (np.array) tip of the pyramid
+        :param spread: (np.array) spread of the pyramid (x, y)/unit height
+        :param distance: (float) distance from the tip to the base
+        :param orientation: (np.array) orientation of the pyramid (roll, pitch, yaw)
+        """
         # spread rise/run for distance and width
         self.center = np.array(center)
         self.spread = spread # [x, y]
@@ -339,6 +481,13 @@ class BoundPyramid(BoundPoly):
             self.triangles.append(deepcopy(triangle))
     
     def plot(self, fig, ax, plot):
+        """
+        Plot the pyramid
+        
+        :param fig: (fig) figure to plot on
+        :param ax: (axis) axis to plot on
+        :param plot: (plt) whether to show the plot
+        """
 
         # ax.scatter([self.center[0]],[self.center[1]],[self.center[2]],color='blue')
         
@@ -349,6 +498,12 @@ class BoundPyramid(BoundPoly):
             ax.add_collection3d(Poly3DCollection([triangle], color="b", alpha=0.05))
 
     def contains(self, point):
+        """
+        Check if a point is contained within the pyramid
+        
+        :param point: (np.array) point to check
+        :return: (bool) whether the point is contained
+        """
         box = deepcopy(self.box)
         box.append(box[0])
         # print("start")
