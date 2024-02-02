@@ -82,6 +82,9 @@ class Cluster():
         self.generate_flowers()
         
     def generate_flowers(self):
+        """
+        Generates the flowers in the cluster
+        """
         flowers = []
         if self._params["random_size"]:
             self._params["radius"] = np.random.uniform(0,self._params["radius"])

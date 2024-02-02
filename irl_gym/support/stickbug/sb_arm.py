@@ -206,6 +206,13 @@ class SBArm:
         return np.array([0,0,0]), np.array(elbow), np.array(hand)
     
     def plot_arm(self,fig,ax,plot=False):
+        """
+        Plot the arm.
+        
+        :param fig: (matplotlib.figure.Figure) Figure to plot on.
+        :param ax: (matplotlib.axes._subplots.Axes3DSubplot) Axes to plot on.
+        :param plot: (bool) Whether to plot the arm. *default*: False
+        """
         ax.plot([self._global_pose["shoulder"][0], self._global_pose["elbow"][0]], [self._global_pose["shoulder"][1], self._global_pose["elbow"][1]], [self._global_pose["shoulder"][2], self._global_pose["elbow"][2]], 'g-', lw=2) # bicep
         ax.plot([self._global_pose["elbow"][0], self._global_pose["hand"][0]], [self._global_pose["elbow"][1], self._global_pose["hand"][1]], [self._global_pose["elbow"][2], self._global_pose["hand"][2]], 'g-', lw=2)  # forearm
 

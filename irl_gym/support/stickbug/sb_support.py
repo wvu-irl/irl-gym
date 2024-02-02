@@ -265,6 +265,13 @@ class SBSupport:
         return deepcopy(arm_flowers)
         
     def plot(self, fig, ax, plot):
+        """
+        Plot the agent in the environment.
+        
+        :param fig: (matplotlib.figure.Figure) Figure to plot on
+        :param ax: (matplotlib.axes.Axes) Axes to plot on
+        :param plot: (bool) Whether to plot the agent
+        """
         pt = deepcopy(self._params["pose"]["left"])
         pt[2] = self._params["support_height"]
         ax.plot([self._params["pose"]["left"][0], pt[0]], [self._params["pose"]["left"][1], pt[1]], [self._params["pose"]["left"][2], pt[2]], 'go-', lw=1)  # Vertical line to base
