@@ -1,13 +1,10 @@
 IRL Gym Environments
 ====================
 
-Submodules
-----------
-
 Stickbug
 --------
 
-For full documentation, see the :ref:`stickbug-landing<Stickbug documentation>`.
+For full documentation, see the :ref:`stickbug-landing <Stickbug documentation>`.
 
 
 Grid World
