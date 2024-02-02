@@ -1,4 +1,4 @@
-gymnasium==0.26.1
+gymnasium==0.27.1
 numpy
 pygame
 sphinx==5.1.1
