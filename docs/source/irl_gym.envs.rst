@@ -7,7 +7,7 @@ Submodules
 Stickbug
 --------
 
-For full documentation, see :mod:`irl_gym.envs.stickbug`.
+For full documentation, see the:ref:`stickbug-landing<Stickbug documentation>`.
 
 
 Grid Tunnel
