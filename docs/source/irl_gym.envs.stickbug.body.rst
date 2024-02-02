@@ -6,7 +6,7 @@ Stickbug Robot
 Base
 ----
 
-.. autoclass:: irl_gym.support.stickbug.sb_base
+.. automodule:: irl_gym.support.stickbug.sb_base
     :members: SBBase
     :undoc-members:
     :show-inheritance:
@@ -14,7 +14,7 @@ Base
 Support
 -------
 
-.. autoclass:: irl_gym.support.stickbug.sb_support
+.. automodule:: irl_gym.support.stickbug.sb_support
     :members: SBSupport
     :undoc-members:
     :show-inheritance:
@@ -22,7 +22,7 @@ Support
 Arms
 ----
 
-.. autoclass:: irl_gym.support.stickbug.sb_arm
+.. automodule:: irl_gym.support.stickbug.sb_arm
     :members: SBArm
     :undoc-members:
     :show-inheritance:
