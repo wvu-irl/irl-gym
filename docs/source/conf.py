@@ -23,7 +23,7 @@ release = '0.1.0'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 mathjax_path="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx_math_dollar', 'sphinx.ext.mathjax']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.coverage', 'sphinx_math_dollar', 'sphinx.ext.mathjax', 'sphinx.ext.autosectionlabel']
 
 mathjax2_config = {
     'extensions': ['tex2jax.js'],
