@@ -4,6 +4,12 @@ IRL Gym Environments
 Submodules
 ----------
 
+Stickbug
+--------
+
+For full documentation, see :mod:`irl_gym.envs.stickbug`.
+
+
 Grid Tunnel
 -----------
 
@@ -27,6 +33,8 @@ Sailing
    :members:
    :undoc-members:
    :show-inheritance:
+
+
 
 Module contents
 ---------------

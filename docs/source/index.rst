@@ -1,9 +1,9 @@
-.. irl-gym documentation master file, created by
-   sphinx-quickstart on Fri Dec  9 10:25:40 2022.
+.. irl_gym documentation master file, created by
+   sphinx-quickstart on Thu Feb  1 20:59:43 2024.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to IRL Gym's documentation!
+Welcome to irl_gym's documentation!
 ===================================
 
 .. toctree::

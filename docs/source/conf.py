@@ -13,10 +13,11 @@ sys.path.insert(0, os.path.abspath("../"))
 sys.path.insert(0, os.path.abspath("../../"))
 sys.path.insert(0, os.path.abspath("../../irl_gym/"))
 
+
 project = 'irl-gym'
-copyright = '2022, Jared J. Beard, R. Michael Butts, Yu Gu'
-author = 'Jared J. Beard, R. Michael Butts, Yu Gu'
-release = '0.0.1'
+copyright = '2024, Jared Beard, Trevor Smith, R. Michael Butts, Yu Gu'
+author = 'Jared Beard, Trevor Smith, R. Michael Butts, Yu Gu'
+release = '0.1.0'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -51,6 +52,7 @@ exclude_patterns = []
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
+
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 if not on_rtd:
   html_theme = 'sphinx_rtd_theme'
