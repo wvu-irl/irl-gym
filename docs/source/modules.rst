@@ -5,4 +5,4 @@ IRL Gym
    :maxdepth: 4
 
    irl_gym
-   irl_gym.env.stickbug
+   irl_gym.envs.stickbug
