@@ -22,7 +22,7 @@ Support
 Arms
 ----
 
-.. autoclass:: irl_gym.support.sb_arms
+.. autoclass:: irl_gym.support.sb_arm
     :members:
     :undoc-members:
     :show-inheritance:

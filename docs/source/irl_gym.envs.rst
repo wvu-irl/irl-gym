@@ -4,7 +4,7 @@ IRL Gym Environments
 Stickbug
 --------
 
-For full documentation, see the :ref:`stickbug-landing <Stickbug documentation>`.
+For full documentation, see the :ref:`Stickbug documentation <stickbug-landing>`.
 
 
 Grid World
