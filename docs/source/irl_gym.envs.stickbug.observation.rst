@@ -5,7 +5,7 @@ Observation
 
 The observation class provides an inheritable interface for defining custom observation models.
 
-.. autoclass:: irl_gym.support.observation
+.. autoclass:: irl_gym.support.stickbug.observation
     :members:
     :undoc-members:
     :show-inheritance:
