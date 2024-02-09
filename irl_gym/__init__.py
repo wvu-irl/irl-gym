@@ -147,6 +147,7 @@ register(
         {
             "freq": 120,
             "screenSize":[1000,1000], 
+            "screenObs":[32,32],
             "hitterPose": [250,250],
             "hitterRadius":50,
             "hitterMass": 5,

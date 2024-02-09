@@ -23,7 +23,7 @@ class AirHockeyEnv(Env):
         self.obs_type = obs_type
 
         if obs_type == "screen": 
-            self.observation_space = spaces.Box(0,1, shape=(*params["screenSize"],3))
+            self.observation_space = spaces.Box(0,1, shape=(*params["screenObs"],3))
         else:
             self.observation_space = spaces.Box(0,1, shape=(4+4*params["numPucks"],))
 
@@ -158,7 +158,7 @@ class AirHockeyEnv(Env):
                                 *puck_vels],dtype = "float32")
 
         if  self.obs_type == "screen":
-            return pygame.surfarray.array3d(self._canvas)
+            return cv2.resize(pygame.surfarray.array3d(self._canvas),self._params["screenObs"])
         else:
             return self._state
         
