@@ -26,6 +26,9 @@ from irl_gym.support.stickbug.sb_base import SBBase
 from irl_gym.support.stickbug.sb_support import SBSupport
 from irl_gym.support.stickbug.spawn_flowers import Orchard
 
+# For pollination should not return whether flower was polinated. Or add a flag to turn it off
+
+
 class StickbugEnv(Env):
     """   
     Environment for modelling stickbug. 
@@ -352,7 +355,7 @@ class StickbugEnv(Env):
         """
         Converts images to gif
         """
-        os.system("convert -delay 10 -loop 0 " + self._params["prefix"] + "img*.png " + self._params["prefix"] + "img.gif")
+        os.system("convert -delay 10 -loop 0 `ls -v` " + self._params["prefix"] + "img*.png " + self._params["prefix"] + "img.gif")
 
     def get_fignum(self):
         """
