@@ -34,16 +34,16 @@ class AirHockeyEnv(Env):
 
     def reset(self, seed = None, options = None):
         np.random.seed(seed) 
-        self.hitter = Puck((np.random.rand(2)*(np.array(self.bounds) - 1)),
+        self.hitter = Puck((np.random.rand(2)*(np.array(self.bounds))),
                         self._params["hitterRadius"],
                         self._params["hitterMass"])
         self.pucks = []
         for _ in range(self._params["numPucks"]):
             in_goal = True
             while(in_goal):
-                pose = np.random.rand(2)*(np.array(self.bounds) - 1)
+                pose = np.random.rand(2)
                 in_goal = self.in_goal(pose)
-            self.pucks.append(Puck((np.random.rand(2)*(np.array(self.bounds) - 1)),
+            self.pucks.append(Puck(pose*np.array(self.bounds),
                                     self._params["puckRadius"],
                                     self._params["puckMass"]))
         self._terminated = False
@@ -137,9 +137,9 @@ class AirHockeyEnv(Env):
                                   a_min= self.hitter.radius,
                                   a_max = self.bounds - self.hitter.radius)
     def in_goal(self, poses):
-        return np.logical_and((self.goal_bounds[0][0] <= poses[::2]*self.bounds[0]) &
+        return np.logical_and((poses[::2]*self.bounds[0] >=self.goal_bounds[0][0]) &
                               (poses[::2]*self.bounds[0] <= self.goal_bounds[0][0] + self.goal_bounds[0][1]),
-                              (self.goal_bounds[1][0] <= poses[1::2]*self.bounds[1]) &
+                              (poses[1::2]*self.bounds[1] >= self.goal_bounds[1][0] ) &
                               (poses[1::2]*self.bounds[1] <= self.goal_bounds[1][0] + self.goal_bounds[1][1]))
 
     def in_bound(self,puck):
