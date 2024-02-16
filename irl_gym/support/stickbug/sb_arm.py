@@ -241,7 +241,7 @@ class SBArm:
         # print(self._params["pose"]["angular"])
         camera = [0,self._params["pose"]["angular"][4],np.sum(self._params["pose"]["angular"][0:4])]
         p = list(deepcopy(self._global_pose["hand"]))
-        p.extend(self._params["pose"]["angular"][1:3])
+        p.extend(self._params["pose"]["angular"][1:5])
         v = list(deepcopy(self._params["velocity"]["linear"]))
         v.extend(self._params["velocity"]["angular"])
         return {"position":p, "velocity":v,"bounds": deepcopy(self.bounds)}

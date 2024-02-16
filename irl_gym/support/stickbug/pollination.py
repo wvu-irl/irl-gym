@@ -22,13 +22,14 @@ import numpy as np
 
 __all__ = ["Pollination", "PollinateRadius"]
 
+#make pollination with a timer.
+
 class Pollination(ABC):
     def __init__(self, params = None):
         """
         This is the base class for pollinating flowers
         
         **Input**
-        
         
         :param log_level: (str) Level of logging to use. For more info see `logging levels <https://docs.python.org/3/library/logging.html#levels>`_, *default*: "WARNING"
         """

@@ -40,12 +40,12 @@ class StickbugEnv(Env):
     **States** (dict)
     
         - "base": {"pose" : [x, y, yaw], "velocity" : [v_x, v_y, v_yaw]}
-        - "arms": {"<side><rel_pos>" : {"position":[z, th1, th2, cam_yaw, cam_pitch], "velocity": ..., "bounds": ...}, ...}
+        - "arms": {"<side><rel_pos>" : {"position":[x,y,z, th1, th2, cam_yaw, cam_pitch], "velocity": ..., "bounds": ...}, ...}
         
     **Observations**
     
         Agent position is fully observable {"base": {}, "arms": {}}
-        Flower positions in Observation {"position" : [x, y, z], "orientation" : [x, y, z]}
+        Flower positions in Observation {"<side><rel_pos>" :{"position" : [x, y, z], "orientation" : [x, y, z]}}
         Pollinated flowers {"<side><rel_pos>" : {"position" : [x, y, z], "orientation" : [x, y, z]}}
             (Should this always return or only after a successful attempt (curretnly this one)? 
             Arguments for both...maybe add a flag)

@@ -8,8 +8,8 @@
             {
                 "r_range": [-0.1,1],
                 "t_max": 100,
-                "save_frames": true,
-                "save_gif": true,
+                "save_frames": false,
+                "save_gif": false,
                 "dt": 0.1,
                 "render_bound":
                 {

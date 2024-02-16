@@ -36,28 +36,28 @@ env.reset()
 
 # need to check pollination to see if it gets updated as pollinated in the orchard
 
-# done = False
-# while not done and plt.fignum_exists(env.get_fignum()):
-#     a= {}
-#     a["base"]={"mode":"velocity",
-#                "command":[0,1,0.1],
-#                 }
-#     a["arms"] = {"TR": {"mode":"velocity",
-#                   "command":[0.1,0.1,0.1,0.1,0.1,0.1,0.1],
-#                   "is_joint": False,
-#                   "is_relative": False,
-#                   "pollinate":True}
-#           }#, "TL": {"hand": {"position"
-#     s, r, done, is_trunc, _ = env.step(a)
-#     # print(s, r)
+done = False
+while not done and plt.fignum_exists(env.get_fignum()):
+    a= {}
+    a["base"]={"mode":"velocity",
+               "command":[0,1,0.1],
+                }
+    a["arms"] = {"TR": {"mode":"velocity",
+                  "command":[0.1,0.1,0.1,0.1,0.1,0.1,0.1],
+                  "is_joint": False,
+                  "is_relative": False,
+                  "pollinate":True}
+          }#, "TL": {"hand": {"position"
+    s, r, done, is_trunc, _ = env.step(a)
+    # print(s, r)
     
-#     env.render()
-#     plt.pause(0.5)
+    env.render()
+    plt.pause(0.5)
 
-#     print(_)
-#     # print(env.get_actions(s))
+    print(_)
+    # print(env.get_actions(s))
     
-#     done = done or is_trunc
+    done = done or is_trunc
 
 if params["params"]["save_gif"]:
     env.img_2_gif()
