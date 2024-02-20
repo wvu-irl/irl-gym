@@ -17,6 +17,7 @@ import logging
 from irl_gym.utils.collisions import *
 from irl_gym.utils.tf import *
 from irl_gym.support.stickbug.flower_observation import *
+from irl_gym.test.other_stickbug.planners.plan_utils import arm_2d_ik
 
 import numpy as np
 
@@ -246,36 +247,6 @@ class SBArm:
         v.extend(self._params["velocity"]["angular"])
         return {"position":p, "velocity":v,"bounds": deepcopy(self.bounds)}
     
-    def get_joint_angles(self, point):
-        """
-        Calculate the inverse kinematics of the arm.
-        
-        :param point: (list) [x,y,z] position of the hand.
-        :return: (list) list containing the joint angles of the arm.
-        """
-        #Map position to local coordinate frame
-        # point[0:2] -= np.array(self._params["pose"]["linear"][0:2])
-        #z_rotation(point,self._params["pose"]["linear"],self._params["pose"]["angular"][0])
-        # print(self.name+"point", point)  
-        
-        D = np.sqrt(point[0]**2 + point[1]**2)
-        # print(D)
-        L1 = self._params["mem_length"]["bicep"]
-        L2 = self._params["mem_length"]["forearm"]
-        elbow = np.pi - np.arccos((L1**2 + L2**2 - D**2) / (2 * L1 * L2))
-        # print(elbow)
-        if "L" in self.name:
-            elbow = -elbow
-        shoulder = np.arctan2(point[0], point[1]) +  np.arctan2(L2 * np.sin(elbow), L1 + L2 * np.cos(elbow))
-        
-        #This accounts for axes being upside down
-        elbow = -elbow
-
-        if D > L1 + L2:
-            shoulder = self._params["pose"]["angular"][1]
-            elbow = self._params["pose"]["angular"][2]
-        return [point[2],shoulder, elbow]
-    
     def hand_2_position(self,point,dt = 0.1):
         """
         Move the hand to position.
@@ -286,7 +257,8 @@ class SBArm:
         pt = np.array(point[0:3])
         pt = z_rotation(pt,self._params["pose"]["linear"],self._params["pose"]["angular"][0]-np.pi/2) - self._params["pose"]["linear"]
         pt[2] = self._params["pose"]["linear"][2]
-        angles = list(self.get_joint_angles(pt))
+        angles, _ = arm_2d_ik(pt,self._params["mem_length"]["bicep"],self._params["mem_length"]["forearm"],"L" in self.name,self._params["pose"]["angular"][1:3])
+        angles = list(angles)
         angles.extend(point[3:5])
         self.joint_2_position(angles,dt)
         
@@ -297,7 +269,8 @@ class SBArm:
         :param point: (list) [x,y,z] position of the hand.
         :param dt: (float) time step
         """
-        angles = list(self.get_joint_angles(point))
+        angles, _ = arm_2d_ik(point,self._params["mem_length"]["bicep"],self._params["mem_length"]["forearm"],"L" in self.name,self._params["pose"]["angular"][1:3])
+        angles = list(angles)
         angles.extend(point[3:5])
         self.joint_2_position(angles,dt)
 
@@ -315,7 +288,8 @@ class SBArm:
         z = point[2]
         point = z_rotation(point,self._params["pose"]["linear"],self._params["pose"]["angular"][0]-np.pi/2) - self._params["pose"]["linear"]
         point[2] = z
-        joint_pose = self.get_joint_angles(point)
+        joint_pose, _ = arm_2d_ik(point,self._params["mem_length"]["bicep"],self._params["mem_length"]["forearm"],"L" in self.name,self._params["pose"]["angular"][1:3])
+        joint_pose = list(joint_pose)
         
         dv = np.array(joint_pose) - np.array([self._global_pose["hand"][2], self._params["pose"]["angular"][1], self._params["pose"]["angular"][2]])
         dv /= dt

@@ -6,7 +6,59 @@
             "stitch": {"combo": []},
             "params":
             {
-                
+                "base_params":
+                {
+
+                },
+                "arm_params":
+                {
+                    "num_arms": 1,
+                    "selection_criterion": "random_point",
+                    "pollination_radius": 0.1,
+                    "force_constant": 0.01,
+                    "force_threshold": 0.1,
+                    "joint_rest": [-2.35, 2.35],
+                    "mem_length":
+                    {
+                        "bicep": 0.5,
+                        "forearm": 0.5
+                    },
+                    "l2_timeout": 25,
+                    "l1_timeout": 50,
+                    "joint_constraints": 
+                    {
+                        "th1": 
+                        {
+                            "min": -2.9,
+                            "max": 2.9
+                        }, 
+                        "th2": 
+                        {
+                            "min": -2.9,
+                            "max": 2.9
+                        },
+                        "pitch": 
+                        {
+                            "min": -1.57,
+                            "max": 1.57
+                        },
+                        "yaw": 
+                        {
+                            "min": -1.57,
+                            "max": 1.57
+                        }
+                    },
+                    "mem_offset": [0, 0.25,0],
+                    "support_height": 2
+                },
+                "arbitration_params":
+                {
+                    "base_referee": "density",
+                    "arm_referee": "timed",
+                    "conflict_threshold": 0.1,
+                    "conflict_timer": 5,
+                    "joint_rest": [-2.35, 2.35]
+                }
             }
         }
     ]

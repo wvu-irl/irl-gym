@@ -50,6 +50,7 @@ class StickbugEnv(Env):
             (Should this always return or only after a successful attempt (curretnly this one)? 
             Arguments for both...maybe add a flag)
         In the future maybe observe rows/plants too?
+        time 
 
     **Actions**
     
@@ -282,7 +283,9 @@ class StickbugEnv(Env):
         :return: (State)
         """
         self._log.debug("Get Obs: " + str(self._state))
-        return deepcopy(self._state)
+        s = deepcopy(self._state)
+        s["time"] = self._t
+        return s
     
     def _get_info(self):
         """
