@@ -56,10 +56,9 @@ class AirHockeyEnv(Env):
         self._canvas.fill(color=(255,255,255))
         pygame.draw.rect(self._canvas,(255,0,0),(0,0,*self.bounds),width= 6)
         pygame.draw.rect(self._canvas,(0,0,255),self.goal_bounds)
-        pygame.draw.circle(self._canvas,(255,0,0),self.hitter.pose,self.hitter.radius)
         for p in self.pucks:
             pygame.draw.circle(self._canvas,(0,0,0),p.pose,p.radius) 
-        
+        pygame.draw.circle(self._canvas,(255,0,0),self.hitter.pose,self.hitter.radius)
         if self.render_mode == "human":
             self._screen.blit(self._canvas,self._canvas.get_rect())
             pygame.display.flip()
