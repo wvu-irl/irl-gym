@@ -16,7 +16,7 @@ import logging
 
 import numpy as np
 
-from planner import Planner
+from irl_gym.test.other_stickbug.planners.planner import Planner
 
 class BasePlanner(Planner):
     """
@@ -30,7 +30,7 @@ class BasePlanner(Planner):
     """
     def __init__(self, params = None):
         
-        super(BasePlanner, self).__init__()
+        super(BasePlanner, self).__init__(params)
         
         if "log_level" not in params:
             params["log_level"] = "WARNING"

@@ -27,34 +27,40 @@ from irl_gym.utils.collisions import *
 from irl_gym.support.stickbug.sb_base import SBBase
 from irl_gym.support.stickbug.sb_support import SBSupport
 from irl_gym.support.stickbug.spawn_flowers import *
+from irl_gym.test.other_stickbug.planners.stickbug_planners import *
 
 params = json.load(open(current+'/sb_params.json'))
 params = params["envs"][0]
-print(params)
 env = gym.make("irl_gym/StickbugEnv-v0", max_episode_steps=params["max_episode_steps"], params=params["params"])
-env.reset()
+s, _ = env.reset()
 
+plan_params = json.load(open(current+'/other_stickbug/sb_plan_params.json'))
+# print(plan_params["algs"][0]["params"])
+planner = RefereePlanner(plan_params["algs"][0]["params"])
 # need to check pollination to see if it gets updated as pollinated in the orchard
 
 done = False
 while not done and plt.fignum_exists(env.get_fignum()):
-    a= {}
-    a["base"]={"mode":"velocity",
-               "command":[0,1,0.1],
-                }
-    a["arms"] = {"TR": {"mode":"velocity",
-                  "command":[0.1,0.1,0.1,0.1,0.1,0.1,0.1],
-                  "is_joint": False,
-                  "is_relative": False,
-                  "pollinate":True}
-          }#, "TL": {"hand": {"position"
+    # a= {}
+    # a["base"]={"mode":"velocity",
+    #            "command":[0,1,0.1],
+    #             }
+    # a["arms"] = {"TR": {"mode":"velocity",
+    #               "command":[0.1,0.1,0.1,0.1,0.1,0.1,0.1],
+    #               "is_joint": False,
+    #               "is_relative": False,
+    #               "pollinate":True}
+        #   }#, "TL": {"hand": {"position"
+    # print(s)
+    a = planner.evaluate(s)
+    print(a)
     s, r, done, is_trunc, _ = env.step(a)
     # print(s, r)
     
     env.render()
     plt.pause(0.5)
 
-    print(_)
+    # print(_)
     # print(env.get_actions(s))
     
     done = done or is_trunc

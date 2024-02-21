@@ -15,13 +15,17 @@ from copy import deepcopy
 import logging
 
 import numpy as np
+import functools 
+
 from abc import ABC, abstractmethod
 
 from irl_gym.utils.collisions import BoundCylinder
 
-from planner import Planner
-from arm_planners import MultiArmPlanner
-from base_planners import BasePlanner
+from irl_gym.test.other_stickbug.planners.planner import Planner
+from irl_gym.test.other_stickbug.planners.arm_planners import MultiArmPlanner
+from irl_gym.test.other_stickbug.planners.base_planners import BasePlanner
+
+__all__ = ["StickbugPlanner", "RefereePlanner"]
 
 class StickbugPlanner(Planner):
     """
@@ -37,7 +41,7 @@ class StickbugPlanner(Planner):
     """
     def __init__(self, params = None):
         
-        super(StickbugPlanner, self).__init__()
+        super(StickbugPlanner, self).__init__(params)
         
         if "log_level" not in params:
             params["log_level"] = "WARNING"
@@ -76,9 +80,9 @@ class StickbugPlanner(Planner):
         """
         action = {}
         if "base_params" in self._params and self._params["base_params"] is not None:
-            action["base"] = self._base_planner.evaluate(state["base"]) # base                
+            action["base"] = self._base_planner.evaluate(state) # base                
         if "arm_params" in self._params and self._params["arm_params"] is not None:
-            action["arm"] = self._arm_planner.evaluate(state["arms"])
+            action["arm"] = self._arm_planner.evaluate(state)
         return action
     
     
@@ -129,8 +133,12 @@ class RefereePlanner(StickbugPlanner):
             self._pollinated_flowers.extend(state["pollinated"][arm])
             self._pollinated_flowers = list(set(self._pollinated_flowers))
         for arm in state["flowers"]:
-            self._flowers.extend(state["flowers"][arm])
-            self._flowers = list(set(self._flowers))
+            temp = deepcopy(self._flowers)
+            for flower in state["flowers"][arm]:
+                for temp_flower in self._flowers:
+                    if np.linalg.norm(np.array(flower) - np.array(temp_flower)) < 1e-3:
+                        temp.append(temp_flower)
+            self._flowers = temp
             
         # filter out pollinated flowers
         for arm in state["flowers"]:
@@ -151,31 +159,31 @@ class RefereePlanner(StickbugPlanner):
             #     del state["arms"][arm]
         
         action = {}
-        action["base"] = self._base_planner.evaluate(state["base"]) # base                
-        action["arm"] = self._arm_planner.evaluate(state["arms"]) # arm
+        # action["base"] = self._base_planner.evaluate(state["base"]) # base                
+        action["arm"] = self._arm_planner.evaluate(state) # arm
         
         for arm in self._conflict:
             action["arms"][arm] = self._conflict[arm]
         
         # referee arbitration
-        if self._arbitration_params["base_referee"] == "density":
-            workspace = BoundCylinder(state["base"]["position"], self._arbitration_params["reach"], self._params["base_params"]["workspace_height"])
-            in_reach = []
-            for flower in state["flowers"]:
-                if workspace.contains(flower):
-                    in_reach.append(flower)
+        # if self._arbitration_params["base_referee"] == "density":
+        #     workspace = BoundCylinder(state["base"]["position"], self._arbitration_params["reach"], self._params["base_params"]["workspace_height"])
+        #     in_reach = []
+        #     for flower in state["flowers"]:
+        #         if workspace.contains(flower):
+        #             in_reach.append(flower)
             
-            if len(in_reach) > self._arbitration_params["density_threshold"]:
-                action["base"] = {"mode": "velocity", "command": [0,0,0]}
+        #     if len(in_reach) > self._arbitration_params["density_threshold"]:
+        #         action["base"] = {"mode": "velocity", "command": [0,0,0]}
         
         
         if self._arbitration_params["arm_referee"] == "pick_and_place":
             for arm in state["arms"]:
                 for arm2 in state["arms"]:
                     if arm != arm2:
-                        if np.linalg( np.array(state["arms"][arm][0:3]) - np.array(state["arms"][arm2]["position"]) ) < self._arbitration_params["conflict_threshold"]:
-                            d1 = np.linalg( np.array(state["arms"][arm][0:3]) - np.array(action["arms"]["arm"]["command"][0:3]) )
-                            d2 = np.linalg( np.array(state["arms"][arm2][0:3]) - np.array(action["arms"]["arm2"]["command"][0:3]) )
+                        if np.linalg.norm( np.array(state["arms"][arm]["position"][0:3]) - np.array(state["arms"][arm2]["position"][0:3]) ) < self._arbitration_params["conflict_threshold"]:
+                            d1 = np.linalg.norm( np.array(state["arms"][arm]["position"][0:3]) - np.array(action["arms"]["arm"]["command"][0:3]) )
+                            d2 = np.linalg.norm( np.array(state["arms"][arm2]["position"][0:3]) - np.array(action["arms"]["arm2"]["command"][0:3]) )
                             
                             if d1 > self._arbitration_params["conflict_threshold"]:
                                 action["arms"][arm]["command"][0:3] = self.replan_arm(state["arms"], arm)
@@ -187,7 +195,7 @@ class RefereePlanner(StickbugPlanner):
             for arm in state["arms"]:
                 for arm2 in state["arms"]:
                     if arm != arm2:
-                        if np.linalg( np.array(state["arms"][arm][0:3]) - np.array(state["arms"][arm2]["position"]) ) < self._arbitration_params["conflict_threshold"]:
+                        if np.linalg.norm( np.array(state["arms"][arm]["position"][0:3]) - np.array(state["arms"][arm2]["position"][0:3]) ) < self._arbitration_params["conflict_threshold"]:
                             self._conflict[arm] = 0
                             self._conflict[arm2] = 0
                             

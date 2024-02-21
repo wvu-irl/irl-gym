@@ -26,7 +26,7 @@ def nearest_point(point, points):
     :param points: (list) list of [x,y,z] points
     :return: (list) [x,y,z] nearest point
     """
-    return points[np.argmin(np.linalg.norm(points - point, axis = 1))]
+    return points[np.argmin(np.linalg.norm(np.array(points) - np.array(point), axis = 1))]
 
 def random_point(point, points):
     """

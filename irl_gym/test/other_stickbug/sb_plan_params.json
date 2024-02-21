@@ -12,7 +12,7 @@
                 },
                 "arm_params":
                 {
-                    "num_arms": 1,
+                    "num_arms": 6,
                     "selection_criterion": "random_point",
                     "pollination_radius": 0.1,
                     "force_constant": 0.01,
@@ -48,8 +48,9 @@
                             "max": 1.57
                         }
                     },
-                    "mem_offset": [0, 0.25,0],
-                    "support_height": 2
+                    "support_offset": [0, 0.25,0],
+                    "support_height": 2,
+                    "buffer": 0.1
                 },
                 "arbitration_params":
                 {
