@@ -45,8 +45,8 @@ class StickbugEnv(Env):
     **Observations**
     
         Agent position is fully observable {"base": {}, "arms": {}}
-        Flower positions in Observation {"<side><rel_pos>" :{"position" : [x, y, z], "orientation" : [x, y, z]}}
-        Pollinated flowers {"<side><rel_pos>" : {"position" : [x, y, z], "orientation" : [x, y, z]}}
+        "flowers": {"<side><rel_pos>" :{"position" : [x, y, z], "orientation" : [x, y, z]}}
+        "pollinated": {"<side><rel_pos>" : {"position" : [x, y, z], "orientation" : [x, y, z]}}
             (Should this always return or only after a successful attempt (curretnly this one)? 
             Arguments for both...maybe add a flag)
         In the future maybe observe rows/plants too?
@@ -199,7 +199,13 @@ class StickbugEnv(Env):
         self._t = 0
         self._num_pol_prev = 0
         self._num_flowers, self._num_pollinated = self._orchard.count_flowers()
-
+        temp = self._base.get_abs_state()
+        del temp["left"]
+        del temp["right"]
+        self._state["base"] = temp
+        self._state["arms"] = {}
+        self._state["flowers"] = {}
+        self._state["pollinated"] = {}
         
         if options["render"] == "plot":
             if hasattr(self, "_fig"):   
@@ -234,11 +240,13 @@ class StickbugEnv(Env):
         if "dt" not in a or "dt" == -1:
             a["dt"] = self._params["dt"]
 
+        if "base" not in a:
+            a["base"] = {"mode": "velocity", "command": [0, 0, 0]}
         base_pose = self._base.step(a["base"], a["dt"])
         self._state["base"] = {}
         self._state["base"]["pose"] = base_pose.pop("pose")
         self._state["base"]["velocity"] = base_pose.pop("velocity")
-        
+    
         self._support.update(base_pose)
         
         obs_position = self._state["base"]["pose"][0:3]
@@ -246,6 +254,8 @@ class StickbugEnv(Env):
         obs_radius += self._params["base"]["base_dim"]["radius"]
         flowers = self._orchard.get_flowers(obs_position, obs_radius)
         
+        if "arms" not in a:
+            a["arms"] = {}
         arm_poses, arm_flowers, arm_pollinated = self._support.step(a["arms"], a["dt"], flowers)
         self._state["arms"] = deepcopy(arm_poses)
         self._state["flowers"] = deepcopy(arm_flowers)
@@ -345,10 +355,10 @@ class StickbugEnv(Env):
                 for i in range(len(arm)):
                     self._ax.scatter(arm[i]["position"][0], arm[i]["position"][1], arm[i]["position"][2], color='black', marker='o')
                     
-            for armkey in self._state["pollinated"]:
-                arm = self._state["pollinated"][armkey]
-                if arm:
-                    self._ax.scatter(arm["position"][0], arm["position"][1], arm["position"][2], color='red', marker='o')
+            # for armkey in self._state["pollinated"]:
+            #     arm = self._state["pollinated"][armkey]
+            #     if arm:
+            #         self._ax.scatter(arm["position"][0], arm["position"][1], arm["position"][2], color='red', marker='o')
             
         if self._params["save_frames"]:
             plt.savefig(self._params["prefix"] + "img" + str(self._img_count) + ".png")

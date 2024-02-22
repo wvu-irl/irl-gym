@@ -53,14 +53,22 @@ while not done and plt.fignum_exists(env.get_fignum()):
         #   }#, "TL": {"hand": {"position"
     # print(s)
     a = planner.evaluate(s)
-    print(a)
+    
+    # for arm in a["arms"]:
+    #     print(arm, a["arms"][arm]["pollinate"])
+    #     print(a["arms"][arm]["command"])
+    #     print(s["arms"][arm]["position"])
     s, r, done, is_trunc, _ = env.step(a)
+    # for arm in a["arms"]:
+    #     if "pollinate" in a["arms"][arm] and a["arms"][arm]["pollinate"]:
+    #         print(arm, " pollinated?")
+    #         print(s["pollinated"][arm])
     # print(s, r)
     
     env.render()
     plt.pause(0.5)
 
-    # print(_)
+    print(_)
     # print(env.get_actions(s))
     
     done = done or is_trunc

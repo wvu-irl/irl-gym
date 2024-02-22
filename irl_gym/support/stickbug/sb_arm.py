@@ -254,9 +254,10 @@ class SBArm:
         :param point: (list) [x,y,z,th1,th2,cam_yaw,cam_pitch] position of the hand.
         :param dt: (float) time step
         """
-        pt = np.array(point[0:3])
-        pt = z_rotation(pt,self._params["pose"]["linear"],self._params["pose"]["angular"][0]-np.pi/2) - self._params["pose"]["linear"]
+        pt = deepcopy(np.array(point[0:3]))
         pt[2] = self._params["pose"]["linear"][2]
+        pt = z_rotation(pt,self._params["pose"]["linear"],self._params["pose"]["angular"][0]-np.pi/2) - self._params["pose"]["linear"]
+        pt[2] = point[2]
         angles, _ = arm_2d_ik(pt,self._params["mem_length"]["bicep"],self._params["mem_length"]["forearm"],"L" in self.name,self._params["pose"]["angular"][1:3])
         angles = list(angles)
         angles.extend(point[3:5])
@@ -481,8 +482,9 @@ class SBArm:
         for flower in flowers:
             flower.pollinate(pos)
             if flower.is_pollinated:
-                position, orientation, _ = deepcopy(flower.get_pose())
-                return {"position": position, "orientation": orientation}
+                print("POLLINATED")
+                #need to make orientation inverse of flower
+                return {"position": pos[0:3], "orientation": [0,0,0]}
         return {}
             
     #for pollinate need to pass in and update true flowers

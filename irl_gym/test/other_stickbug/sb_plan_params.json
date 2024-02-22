@@ -14,17 +14,17 @@
                 {
                     "num_arms": 6,
                     "selection_criterion": "random_point",
-                    "pollination_radius": 0.1,
+                    "pollination_radius": 0.05,
                     "force_constant": 0.01,
                     "force_threshold": 0.1,
                     "joint_rest": [-2.35, 2.35],
                     "mem_length":
                     {
-                        "bicep": 0.5,
-                        "forearm": 0.5
+                        "bicep": 0.75,
+                        "forearm": 0.75
                     },
-                    "l2_timeout": 25,
-                    "l1_timeout": 50,
+                    "l2_timeout": 100,
+                    "l1_timeout": 200,
                     "joint_constraints": 
                     {
                         "th1": 
@@ -50,6 +50,7 @@
                     },
                     "support_offset": [0, 0.25,0],
                     "support_height": 2,
+                    "base_height": 0.3,
                     "buffer": 0.1
                 },
                 "arbitration_params":

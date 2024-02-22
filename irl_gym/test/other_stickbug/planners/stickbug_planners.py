@@ -82,7 +82,7 @@ class StickbugPlanner(Planner):
         if "base_params" in self._params and self._params["base_params"] is not None:
             action["base"] = self._base_planner.evaluate(state) # base                
         if "arm_params" in self._params and self._params["arm_params"] is not None:
-            action["arm"] = self._arm_planner.evaluate(state)
+            action["arms"] = self._arm_planner.evaluate(state)
         return action
     
     
@@ -106,7 +106,7 @@ class RefereePlanner(StickbugPlanner):
         self._log.debug("Init Referee Planner")
         
         self._flowers = []
-        self._pollinated_flowers = []
+        self._pollinated = []
         self._conflict = {}
         
     def reinit(self, state=None, action=None, s_prime=None):
@@ -130,21 +130,44 @@ class RefereePlanner(StickbugPlanner):
                 
         # update global pollinated (in future will need to make version that accounts for stochasticity)
         for arm in state["pollinated"]:
-            self._pollinated_flowers.extend(state["pollinated"][arm])
-            self._pollinated_flowers = list(set(self._pollinated_flowers))
+            if len(self._pollinated) == 0:
+                if len(state["pollinated"][arm]) > 0:
+                    self._pollinated.append(deepcopy(state["pollinated"][arm]))
+            elif len(state["pollinated"][arm]) > 0:
+                temp = deepcopy(self._pollinated)
+                is_found = False
+                print(self._pollinated)
+                for temp_flower in self._pollinated:
+                    print(state["pollinated"][arm])
+                    if np.linalg.norm(np.array(state["pollinated"][arm]["position"]) - np.array(temp_flower["position"])) < 5e-2:
+                        is_found = True
+                if not is_found:
+                    temp.append(state["pollinated"][arm])
+                self._pollinated = temp
         for arm in state["flowers"]:
-            temp = deepcopy(self._flowers)
-            for flower in state["flowers"][arm]:
-                for temp_flower in self._flowers:
-                    if np.linalg.norm(np.array(flower) - np.array(temp_flower)) < 1e-3:
-                        temp.append(temp_flower)
-            self._flowers = temp
-            
+            if len(self._flowers) == 0:
+                self._flowers = deepcopy(state["flowers"][arm])
+            else:
+                temp = deepcopy(self._flowers)
+                for flower in state["flowers"][arm]:
+                    is_found = False
+                    for temp_flower in self._flowers:
+                        if np.linalg.norm(np.array(flower["position"]) - np.array(temp_flower["position"])) < 5e-2:
+                            is_found = True
+                    if not is_found:
+                        temp.append(flower)
+                self._flowers = temp
+        
+        # share pollinated flowers
+        for arm in state["pollinated"]:
+            state["pollinated"][arm] = deepcopy(self._pollinated)
+               
         # filter out pollinated flowers
-        for arm in state["flowers"]:
-            for flower in state["flowers"][arm]:
-                if flower in self._pollinated_flowers:
-                    state["flowers"][arm].remove(flower)
+        # for arm in state["flowers"]:
+        #     for flower in state["flowers"][arm]:
+        #         for pollinated in self._pollinated:
+        #             if np.sqrt(np.linalg.norm(np.array(flower["position"]) - np.array(pollinated["position"]))) < 4e-2:
+        #                 state["flowers"][arm].remove(flower)
         
         for arm in self._conflict:
             if self._conflict[arm] > self._arbitration_params["conflict_timer"]:
@@ -160,7 +183,7 @@ class RefereePlanner(StickbugPlanner):
         
         action = {}
         # action["base"] = self._base_planner.evaluate(state["base"]) # base                
-        action["arm"] = self._arm_planner.evaluate(state) # arm
+        action["arms"] = self._arm_planner.evaluate(state) # arm
         
         for arm in self._conflict:
             action["arms"][arm] = self._conflict[arm]

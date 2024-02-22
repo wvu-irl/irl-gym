@@ -3,11 +3,11 @@
     [
         {
             "env": "irl_gym/GridTunnel-v0",
-            "max_episode_steps": 50,
+            "max_episode_steps": 2000,
             "params":
             {
                 "r_range": [-0.1,1],
-                "t_max": 100,
+                "t_max": 200,
                 "save_frames": false,
                 "save_gif": false,
                 "dt": 0.1,
@@ -20,7 +20,7 @@
                 "render": "plot",
                 "base":
                 {
-                    "pose": [1.35,-5,0,0],
+                    "pose": [1.35,-3.5,0,0],
                     "velocity": [0,0,0,0],
                     "mem_offset": [0, 0.25,0],
                     "max_accel": 1,
@@ -62,8 +62,8 @@
                     "num_arms": 6,
                     "mem_length":
                     {
-                        "bicep": 0.5,
-                        "forearm": 0.5
+                        "bicep": 0.75,
+                        "forearm": 0.75
                     },
                     "joint_rest": [-2.35, 2.35],
                     "joint_constraints": 
@@ -93,7 +93,7 @@
                     "max_speed": 
                     {
                         "v": 0.1,
-                        "w": 0.1
+                        "w": 0.2
                     },
                     "pid":
                     {
@@ -157,7 +157,7 @@
                             "pollination_params":
                             {
                                 "type": "radius",
-                                "radius": 0.5,
+                                "radius": 0.1,
                                 "probability": 0.9,
                                 "log_level": "INFO"
                             }
@@ -180,9 +180,9 @@
                             "pos_bias": [0,0,0],
                             "pos_cov":
                             [
-                                [0.1,0,0],
-                                [0,0.1,0],
-                                [0,0,0.1]
+                                [0.0,0,0],
+                                [0,0.0,0],
+                                [0,0,0.0]
                             ],
                             "or_cov":
                             [

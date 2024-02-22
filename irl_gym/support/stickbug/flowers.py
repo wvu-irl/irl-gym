@@ -93,6 +93,7 @@ class Flower():
         Sample the flower pose
         """
         #
+        print(self.covariance["position"])
         pt = np.random.multivariate_normal(self.position, self.covariance["position"])
         orientation = np.random.multivariate_normal(self.orientation, self.covariance["orientation"])
         return pt, orientation
@@ -103,7 +104,8 @@ class Flower():
         
         :param pollinator_position: (list) [x,y,z,yaw,pitch] position and orientation of the hand in global
         """
-        self.is_pollinated = self.pollinator.pollinate(self.position, pollinator_position, self.orientation)
+        if not self.is_pollinated:
+            self.is_pollinated = self.pollinator.pollinate(self.position, pollinator_position, self.orientation)
 
 class FlowerHatchFilter(Flower):
     def __init__(self, position=None, id=None, orientation=None, covariance=None, max_observations=10):

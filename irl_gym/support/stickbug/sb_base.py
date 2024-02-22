@@ -71,7 +71,7 @@ class SBBase:
         if "base_dim" not in params:
             params["base_dim"] = {"radius":0.25,"height":0.5}
         
-        params["mem_offset"][2] += params["base_dim"]["height"]
+        # params["mem_offset"][2] += params["base_dim"]["height"]
         self._support_left = deepcopy(params["mem_offset"] )
         self._support_right = deepcopy(params["mem_offset"] )   
         self._support_right[1] *= -1
@@ -105,8 +105,11 @@ class SBBase:
         """
         supports = self.get_rel_support()
         
-        supports["left"][0:3] = z_rotation_origin(supports["left"][0:3],self._params["pose"][0:3], -self._params["pose"][3])
-        supports["right"][0:3] = z_rotation_origin(supports["right"][0:3],self._params["pose"][0:3], -self._params["pose"][3])
+        p = self._params["pose"][0:3]
+        p[2] += self._params["base_dim"]["height"]
+        
+        supports["left"][0:3] = z_rotation_origin(supports["left"][0:3],p, -self._params["pose"][3])
+        supports["right"][0:3] = z_rotation_origin(supports["right"][0:3],p, -self._params["pose"][3])
         supports["left"][3] = self._params["pose"][3]
         supports["right"][3] = self._params["pose"][3]
         return supports

@@ -129,7 +129,10 @@ class Cluster():
         :param plot: (bool) Whether to plot or not, *default*: False
         """
         for flower in self.flowers:
-            ax.scatter(flower.position[0],flower.position[1],flower.position[2],color = "c")
+            if flower.is_pollinated:
+                ax.scatter(flower.position[0],flower.position[1],flower.position[2],color = "m")
+            else:
+                ax.scatter(flower.position[0],flower.position[1],flower.position[2],color = "c")
         if self._params["show_cluster"]:
             BoundSphere(self._params["position"], self._params["radius"]).plot(fig, ax, plot)
             
@@ -302,7 +305,10 @@ class Plant():
         :param plot: (bool) Whether to plot or not, *default*: False
         """
         for flower in self.flowers:
-            ax.scatter(flower.position[0],flower.position[1],flower.position[2],color = "white")
+            if flower.is_pollinated:
+                ax.scatter(flower.position[0],flower.position[1],flower.position[2],color = "r")
+            else:
+                ax.scatter(flower.position[0],flower.position[1],flower.position[2],color = "white")
         
         for cluster in self.clusters:
             cluster.plot(fig, ax, plot)

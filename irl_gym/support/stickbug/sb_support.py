@@ -245,6 +245,11 @@ class SBSupport:
             arm_poses[key] = pos
             arm_flowers[key] = obs_flowers
             arm_pollinated[key] = pol_flowers
+        other_arms = set(self._arm_names) - set(action.keys())
+        for key in other_arms:
+            arm_poses[key] = self._arms[key].get_absolute_state()
+            arm_flowers[key] = self._arms[key].observe_flowers(flowers)
+            arm_pollinated[key] = self._arms[key].pollinated_flowers
         
         self.arm_flowers = arm_flowers
         self.update(self._params["pose"])

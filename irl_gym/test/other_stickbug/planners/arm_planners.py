@@ -156,19 +156,33 @@ class ArmPlanner(Planner):
         """
         # update support location and orientation
 
-        temp = deepcopy(self._flowers)
-        for flower in state["flowers"][self._name]:
-            for temp_flower in self._flowers:
-                if np.linalg.norm(np.array(flower) - np.array(temp_flower)) < 1e-3:
-                    temp.append(temp_flower)
-        self._flowers = temp
         
-        temp = deepcopy(self._pollinated)
-        for flower in state["flowers"][self._name]:
-            for temp_flower in self._pollinated:
-                if np.linalg.norm(np.array(flower) - np.array(temp_flower)) < 1e-3:
-                    temp.append(temp_flower)
-        self._pollinated = temp
+        if len(self._flowers) == 0:
+            self._flowers = deepcopy(state["flowers"][self._name])
+        else:
+            temp = deepcopy(self._flowers)
+            for flower in state["flowers"][self._name]:
+                is_found = False
+                for temp_flower in self._flowers:
+                    # print(flower["position"], temp_flower["position"], np.sqrt(np.linalg.norm(np.array(flower["position"]) - np.array(temp_flower["position"]))))
+                    if np.linalg.norm(np.array(flower["position"]) - np.array(temp_flower["position"])) < 5e-2:
+                        is_found = True
+                if not is_found:
+                    temp.append(flower)
+            self._flowers = temp
+        
+        if len(self._pollinated) == 0:
+            self._pollinated = deepcopy(state["pollinated"][self._name])
+        else:
+            temp = deepcopy(self._pollinated)
+            for flower in state["pollinated"][self._name]:
+                is_found = False
+                for temp_flower in self._pollinated:
+                    if np.linalg.norm(np.array(flower["position"]) - np.array(temp_flower["position"])) < self._params["pollination_radius"]:
+                        is_found = True
+                if not is_found:
+                    temp.append(flower)
+            self._pollinated = temp
         
         self._support = list(z_rotation_origin(self._offset, state["base"]["pose"][0:2] + [0], -state["base"]["pose"][3]))
         self._support.append(state["base"]["pose"][2])
@@ -207,19 +221,32 @@ class GreedyArmPlanner(ArmPlanner):
         :return action: (dict) dictionary of action
         """
         super().evaluate(state)
-        
-        unpollinated = list(set(self._flowers) - set(self._pollinated))
-
+        unpollinated = []
+        for flower in self._flowers:
+            is_found = False
+            for pol in self._pollinated:
+                if np.linalg.norm(np.array(flower["position"]) - np.array(pol["position"])) < 1e-3:
+                    is_found = True
+            if not is_found:
+                unpollinated.append(flower["position"])
+                    
+        # print(self._name, self._flowers)
+        # print(self._name, self._pollinated)
+        # print(self._name, len(unpollinated), unpollinated)
         action = {}
-                                                                             
+                          
+        #need to add case for when no flowers in reach
+                                                           
         # level 3 competancy : go to closest flower position 
-        if (self._state == "3" or self._state == "2") and np.linalg.norm(state["arms"][self._name]["position"] - self._target) < self._params["pollination_radius"]:
+        if (self._state == "3" or self._state == "2") and np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target)) < self._params["pollination_radius"]:
             self._pollination_time = 0
+            # if self._state == "3":
             self._state = "4"
+            print("pollinate------------------------------------")
             return {
                         "mode": "velocity", 
                         "is_joint": False,
-                        "command": [0, 0, 0, 0, 0, 0,0], 
+                        "command": [0,0, 0,0, 0,0, 0], 
                         "pollinate": True, 
                         "is_relative": False
                     }
@@ -228,9 +255,11 @@ class GreedyArmPlanner(ArmPlanner):
                 
         if self._pollination_time < self._params["l2_timeout"] and len(unpollinated):# - np.random.randint(0,25):
             self._target = nearest_point(state["arms"][self._name]["position"][0:3], unpollinated)
+            print("--->",self._target, state["arms"][self._name]["position"][0:3])
             self._valid_goal = self.check_constraints(self._target,state)
             if self._valid_goal == True:
                 self._state = "3"
+            print(self._name, self._valid_goal, np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target)))
         elif self._state == "3":
             self._valid_goal = False       
         
@@ -239,9 +268,15 @@ class GreedyArmPlanner(ArmPlanner):
             if len(unpollinated):
                 self._target = random_point(state["arms"][self._name]["position"][0:3], unpollinated)
             else:
-                self._target = [np.random.uniform(-1,1), np.random.uniform(-1,1), np.random.uniform(self._params["support_height"]-self._params["buffer"],self._params["support_height"]-self._params["buffer"])]
+                s = 1
+                if np.random.rand() < 0.5:
+                    s = -1
+                ind = np.random.randint(0,1)
+                self._target = deepcopy(state["arms"][self._name]["position"][0:3])
+                self._target[ind] += s*0.1
             self._valid_goal = self.check_constraints(self._target,state)
             if self._valid_goal == True:
+                self._pollination_time = 0
                 self._state = "2"
 
          # level 1 competancy : go to the rest position  
@@ -263,19 +298,19 @@ class GreedyArmPlanner(ArmPlanner):
         if self._state == "1" or self._state == "0":
             action = {"mode":"position",
                       "is_joint": True,
-                      "command":[0,0] + self._target_joints + [0,0],
+                      "command":[0,0,state["arms"][self._name]["position"][2]] + list(self._target_joints) + [0,0],
                       "pollinate": False,
                       "is_relative": False,
                       }
         else:
             action = {"mode":"position",
                       "is_joint": False,
-                      "command":self._target + [0,0,0,0],
+                      "command": list(self._target) + [0,0,0,0],
                       "pollinate": False,
                       "is_relative": False
                     }
-            l = np.linalg.norm(state["arms"][self._name]["position"] - self._target)
-            temp = np.linspace(state["arms"][self._name]["position"],self._target,10*l)
+            l = np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target))
+            temp = np.linspace(state["arms"][self._name]["position"][0:3],self._target,int(np.ceil(10*l)))
             temp = temp[0]
             if not self.check_constraints(temp,state):
                 return {
