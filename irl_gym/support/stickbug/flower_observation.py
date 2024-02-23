@@ -123,6 +123,10 @@ class FlowerAll(FlowerObservation):
         """
         super(FlowerAll,self).__init__(params)
         self.ids = 0
+        if "give_id" not in params:
+            self.give_id = False
+        else:
+            self.give_id = params["give_id"] 
         self.update_pose(params["position"], params["orientation"])
         
     def observe(self, flowers, position = None, orientation = None):
@@ -134,14 +138,18 @@ class FlowerAll(FlowerObservation):
         :param orientation: (list) [x,y,z] orientation of the observation in global
         :return: (list) List of observations
         """
+        self.visible_flowers = []
         for flower in flowers:
             if self.give_id:
                 if flower.id is None:
                     flower.id = self.ids
                     self.ids += 1
-            flower.observe({"position": flower.get_pose()[0], "orientation": flower.get_pose()[1], "covariance": flower.get_pose()[2]})
-        super.visible_flowers = deepcopy(flowers)
-        return flowers
+            position, orientation, _ = deepcopy(flower.get_pose())
+            position = np.random.multivariate_normal(position, self._params["noise"]["pos_cov"]) + self._params["noise"]["pos_bias"]
+            orientation = np.random.multivariate_normal(orientation, self._params["noise"]["or_cov"])
+            self.visible_flowers.append({"position": position, "orientation": orientation})
+            
+        return deepcopy(self.visible_flowers)
     
     def plot(self, fig, ax):
         """
@@ -150,9 +158,13 @@ class FlowerAll(FlowerObservation):
         :param fig: (matplotlib.pyplot.figure) Figure to plot on
         :param ax: (matplotlib.pyplot.axes) Axes to plot on
         """
+        # if self._params["show_camera"]: 
+        #     self.fov.plot(fig,ax,plot=False)
+        
         if self._params["show_flowers"]:
             for flower in self.visible_flowers:
-                flower.plot(fig,ax)
+                ax.scatter(flower["position"][0],flower["position"][1],flower["position"][2],color='black')
+
     
 class FlowerPyramid(FlowerObservation):
     def __init__(self, params : dict = None):

@@ -104,8 +104,10 @@ class Flower():
         
         :param pollinator_position: (list) [x,y,z,yaw,pitch] position and orientation of the hand in global
         """
+        temp = deepcopy(self.is_pollinated)
         if not self.is_pollinated:
             self.is_pollinated = self.pollinator.pollinate(self.position, pollinator_position, self.orientation)
+        return temp != self.is_pollinated
 
 class FlowerHatchFilter(Flower):
     def __init__(self, position=None, id=None, orientation=None, covariance=None, max_observations=10):

@@ -148,6 +148,7 @@ class SBSupport:
                 pts.append(self._params["support_height"]-self._params["buffer"])
                 z = self._arms[key].get_absolute_state()["position"][2]
                 # print(pts, z)
+                z = np.clip(z, -self._params["buffer"], self._params["support_height"]-self._params["buffer"])
                 arm_bounds["joints"]["z"]["max"] = np.min([el for el in pts if el >= z])
                 arm_bounds["joints"]["z"]["min"] = np.max([el for el in pts if el <= z])
                 # print(self._params["pose"]["left"])
@@ -161,6 +162,7 @@ class SBSupport:
                 pts.append(self._params["support_height"]-self._params["buffer"])
                 # print(pts, z)
                 z = self._arms[key].get_absolute_state()["position"][2]
+                z = np.clip(z, -self._params["buffer"], self._params["support_height"]-self._params["buffer"])
                 arm_bounds["joints"]["z"]["max"] = np.min([el for el in pts if el >= z])
                 arm_bounds["joints"]["z"]["min"] = np.max([el for el in pts if el <= z])
                 self._arms[key].update(shoulder_pose = self._params["pose"]["right"], constraints = arm_bounds)     

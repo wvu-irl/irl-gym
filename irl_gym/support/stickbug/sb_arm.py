@@ -255,6 +255,7 @@ class SBArm:
         :param dt: (float) time step
         """
         pt = deepcopy(np.array(point[0:3]))
+        print(self.name, np.linalg.norm(pt - np.array(self._global_pose["hand"][0:3])))
         pt[2] = self._params["pose"]["linear"][2]
         pt = z_rotation(pt,self._params["pose"]["linear"],self._params["pose"]["angular"][0]-np.pi/2) - self._params["pose"]["linear"]
         pt[2] = point[2]
@@ -420,7 +421,8 @@ class SBArm:
         self._params["velocity"]["angular"][1:5] = velocity[1:5]
 
         self.update(joint_velocity=velocity)
-            
+        
+        print(self.name, velocity[1], velocity[2], velocity[3], velocity[4])
         return [self._global_pose["shoulder"], self._global_pose["elbow"], self._global_pose["hand"]]
     
     def step(self, action : dict = None, flowers = None):
@@ -480,9 +482,8 @@ class SBArm:
         pos.append(-self._params["pose"]["angular"][0]+np.sum(self._params["pose"]["angular"][1:4]))
         pos.append(self._params["pose"]["angular"][4])
         for flower in flowers:
-            flower.pollinate(pos)
-            if flower.is_pollinated:
-                print("POLLINATED")
+            if flower.pollinate(pos):
+                print("POLLINATED", pos[0:3], flower.position, flower.orientation, flower.is_pollinated)
                 #need to make orientation inverse of flower
                 return {"position": pos[0:3], "orientation": [0,0,0]}
         return {}

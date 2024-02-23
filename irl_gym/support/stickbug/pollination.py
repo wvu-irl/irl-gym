@@ -83,7 +83,7 @@ class PollinateRadius(Pollination):
         :param orientation: (list) [x,y,z] orientation of the flower in global
         :return: (bool) True if pollinated, False otherwise
         """
-        if np.linalg.norm(np.array(position[0:2]) - np.array(pollinator[0:2])) < self._params["radius"]:
+        if np.linalg.norm(np.array(position[0:3]) - np.array(pollinator[0:3])) < self._params["radius"]:
             if np.random.rand() < self._params["probability"]:
                 return True
         return False

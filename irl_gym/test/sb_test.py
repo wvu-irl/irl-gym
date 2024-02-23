@@ -36,7 +36,9 @@ s, _ = env.reset()
 
 plan_params = json.load(open(current+'/other_stickbug/sb_plan_params.json'))
 # print(plan_params["algs"][0]["params"])
-planner = RefereePlanner(plan_params["algs"][0]["params"])
+# planner = RefereePlanner(plan_params["algs"][0]["params"])
+#planner = NaivePlanner(plan_params["algs"][0]["params"])
+planner = HungarianPlanner(plan_params["algs"][0]["params"])
 # need to check pollination to see if it gets updated as pollinated in the orchard
 
 done = False
@@ -54,15 +56,16 @@ while not done and plt.fignum_exists(env.get_fignum()):
     # print(s)
     a = planner.evaluate(s)
     
-    # for arm in a["arms"]:
-    #     print(arm, a["arms"][arm]["pollinate"])
-    #     print(a["arms"][arm]["command"])
-    #     print(s["arms"][arm]["position"])
+    for arm in a["arms"]:
+        print(arm, a["arms"][arm]["pollinate"])
+        print(a["arms"][arm]["command"])
+        print(s["arms"][arm]["position"])
     s, r, done, is_trunc, _ = env.step(a)
     # for arm in a["arms"]:
     #     if "pollinate" in a["arms"][arm] and a["arms"][arm]["pollinate"]:
     #         print(arm, " pollinated?")
     #         print(s["pollinated"][arm])
+    # print("POLLLL ", s["pollinated"])
     # print(s, r)
     
     env.render()

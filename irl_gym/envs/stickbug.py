@@ -181,7 +181,7 @@ class StickbugEnv(Env):
         if "render" not in options:
             options["render"] = "plot"
         if "render_bounds" not in options:
-            options["render_bounds"] = {"x": [-5, 5], "y": [-5, 5], "z": [0, 5]}
+            options["render_bounds"] = {"x": [0, 2], "y": [-4, -2], "z": [0, 2]}
         if "save_frames" not in options:
             options["save_frames"] = False
         if "prefix" not in options:
@@ -361,14 +361,21 @@ class StickbugEnv(Env):
             #         self._ax.scatter(arm["position"][0], arm["position"][1], arm["position"][2], color='red', marker='o')
             
         if self._params["save_frames"]:
-            plt.savefig(self._params["prefix"] + "img" + str(self._img_count) + ".png")
+            if self._img_count <= 9:
+                im_num = "00" + str(self._img_count)
+            elif self._img_count <= 99:
+                im_num = "0" + str(self._img_count)
+            else:
+                im_num = str(self._img_count)
+            plt.savefig(self._params["prefix"] + "img" + im_num + ".png")
             self._img_count += 1
             
     def img_2_gif(self):
         """
         Converts images to gif
         """
-        os.system("convert -delay 10 -loop 0 `ls -v` " + self._params["prefix"] + "img*.png " + self._params["prefix"] + "img.gif")
+        os.system("convert -delay 10 -loop 0 " + self._params["prefix"] + "img*.png " + self._params["prefix"] + "stickbug.gif")
+        # os.system("convert -delay 10 -loop 0 `ls -v` " + self._params["prefix"] + "img*.png " + self._params["prefix"] + "img.gif")
 
     def get_fignum(self):
         """

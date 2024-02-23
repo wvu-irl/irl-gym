@@ -16,7 +16,9 @@ import logging
 
 import numpy as np
 
-__all__ = ["nearest_point", "random_point", "arm_2d_ik"]
+from scipy.optimize import linear_sum_assignment
+
+__all__ = ["nearest_point", "random_point", "arm_2d_ik", "hungarian_assignment"]
 
 def nearest_point(point, points):
     """
@@ -69,3 +71,16 @@ def arm_2d_ik(point, bicep_length, forearm_length, is_left = False, current_angl
         elbow = current_angles[1]
         is_valid = False
     return [point[2],shoulder, elbow], is_valid
+
+def hungarian_assignment(arms, flowers):
+    # Create a distance matrix between arms and flowers
+    distance_matrix = np.zeros((len(arms), len(flowers)))
+    for i, arm in enumerate(arms):
+        for j, flower in enumerate(flowers):
+            distance_matrix[i, j] = np.linalg.norm(np.array(arm) - np.array(flower))
+
+    # Use the Hungarian algorithm to find the optimal assignment
+    row_ind, col_ind = linear_sum_assignment(distance_matrix)
+
+    # Return the optimal assignment
+    return list(zip(row_ind, col_ind))

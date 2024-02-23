@@ -3,26 +3,26 @@
     [
         {
             "env": "irl_gym/GridTunnel-v0",
-            "max_episode_steps": 2000,
+            "max_episode_steps": 1000,
             "params":
             {
                 "r_range": [-0.1,1],
-                "t_max": 200,
-                "save_frames": false,
-                "save_gif": false,
+                "t_max": 100,
+                "save_frames": true,
+                "save_gif": true,
                 "dt": 0.1,
                 "render_bound":
                 {
-                    "x": [-5,5],
-                    "y": [-5,5],
-                    "z": [0,5]
+                    "x": [0,2],
+                    "y": [0,4],
+                    "z": [0,4]
                 },
                 "render": "plot",
                 "base":
                 {
                     "pose": [1.35,-3.5,0,0],
                     "velocity": [0,0,0,0],
-                    "mem_offset": [0, 0.25,0],
+                    "mem_offset": [0.1, 0.05,0],
                     "max_accel": 1,
                     "max_speed": 
                     {
@@ -45,8 +45,8 @@
                     },
                     "base_dim":
                     {
-                        "radius":0.5,
-                        "height":0.3
+                        "radius":0.2,
+                        "height":0.2
                     },
                     "log_level": "INFO"
                 },
@@ -57,15 +57,15 @@
                         "left": [0,0,0,0], 
                         "right": [0,0,0,0]
                     },
-                    "buffer": 0.1,
+                    "buffer": 0.035,
                     "support_height": 2,
                     "num_arms": 6,
                     "mem_length":
                     {
-                        "bicep": 0.75,
-                        "forearm": 0.75
+                        "bicep": 0.2,
+                        "forearm": 0.155
                     },
-                    "joint_rest": [-2.35, 2.35],
+                    "joint_rest": [-2, 2.6],
                     "joint_constraints": 
                     {
                         "th1": 
@@ -100,13 +100,13 @@
                         "p": 1,
                         "i": 0.001,
                         "d": 0,
-                        "db": 0.01
+                        "db": 0.001
                     },
                     "pid_angular":
                     {
-                        "p": 1,
-                        "i": 0.01,
-                        "d": 0,
+                        "p": 0.75,
+                        "i": 0.0,
+                        "d": 0.0,
                         "db": 0.001
                     },
                     "show_bounds": false,
@@ -115,7 +115,7 @@
                 },
                 "orchard":
                 {
-                    "offset" : [2,-5,0],
+                    "offset" : [1.5,-3.6,0],
                     "num_rows": 1,
                     "is_double": false,
                     "spacing": 2,
@@ -123,16 +123,16 @@
                 },
                 "row":
                 {
-                    "size": [1,10,0.25]
+                    "size": [0.3,0.4,0.3]
                 },
                 "plant":
                 {
                     "plant":
                     {
-                        "height": 2,
-                        "radius": 0.5,
+                        "height": 1.5,
+                        "radius": 0.1,
                         "is_type": "cylinder",
-                        "show_plant": true
+                        "show_plant": false
                     },
                     "cluster":
                     {
@@ -142,7 +142,7 @@
                         {
                             "random_size": true,
                             "num_flowers": 6,
-                            "radius": 0.2,
+                            "radius": 0.15,
                             "random_num": true,
                             "show_cluster": false
                         }
@@ -150,14 +150,14 @@
                     },
                     "flower":
                     {
-                        "num_flowers": 25,
-                        "random_num": true,
+                        "num_flowers": 60,
+                        "random_num": false,
                         "flower":
                         {
                             "pollination_params":
                             {
                                 "type": "radius",
-                                "radius": 0.1,
+                                "radius": 0.05,
                                 "probability": 0.9,
                                 "log_level": "INFO"
                             }
@@ -173,8 +173,8 @@
                     "give_id": false,
                     "camera":
                     {
-                        "distance":1.5,
-                        "spread": [0.5,0.2],
+                        "distance":0.5,
+                        "spread": [0.5,0.3],
                         "noise":
                         {
                             "pos_bias": [0,0,0],

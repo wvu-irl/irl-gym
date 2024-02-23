@@ -369,6 +369,8 @@ class Row():
             params["size"] = [1,1,1]
         if "num_plants" not in params:
             params["num_plants"] = None
+        if "show_row" not in params:
+            params["show_row"] = False
             
         if plant_params is None:
             raise ValueError("plant_params must be defined")
@@ -425,7 +427,8 @@ class Row():
         :param ax: (matplotlib.pyplot.axis) Axis to plot on
         :param plot: (bool) Whether to plot or not, *default*: False
         """
-        BoundRectPrism(self._params["position"], self._params["size"]).plot(fig, ax, plot)
+        if self._params["show_row"]:
+            BoundRectPrism(self._params["position"], self._params["size"]).plot(fig, ax, plot)
 
         for plant in self.plants:
             plant.plot(fig, ax, plot)     
