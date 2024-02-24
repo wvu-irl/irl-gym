@@ -10,3 +10,4 @@ irl_gym.egg-info/
 *.pickle
 *.vscode
 *.doctree
+*.csv

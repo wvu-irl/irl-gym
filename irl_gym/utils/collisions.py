@@ -285,6 +285,32 @@ class BoundCylinder(BoundPoly):
             return True
         return False
         
+    def collision(self, bound):
+        """
+        Check if a list of points are contained within the cylinder (and end sphere)
+        
+        :param points: (list) list of points to check
+        :return: (list) list of bools whether the point is contained
+        """
+        pts = bound.get_points()
+        collision = False
+        for pt in pts:
+            if self.contains(pt):
+                collision = True
+        return collision
+    
+    def get_points(self):
+        """
+        Get the points of the cylinder
+        
+        :return: (list) list of points
+        """
+        pt = deepcopy(self.center)
+        pt[2] += self.height
+        pt = y_rotation(pt,self.center,self.y_rot)
+        pt = z_rotation(pt,self.center,self.z_rot)
+        pts = np.linspace(self.center,pt,10)
+        return pts
         
     
 class BoundSphere(BoundPoly):
@@ -326,6 +352,28 @@ class BoundSphere(BoundPoly):
         point = np.array(point)
         dist = np.sqrt((point[0] - self.center[0])**2 + (point[1] - self.center[1])**2 + (point[2] - self.center[2])**2)
         return dist <= self.radius
+    
+    def collision(self, bound):
+        """
+        Check if a list of points are contained within the sphere
+        
+        :param points: (list) list of points to check
+        :return: (list) list of bools whether the point is contained
+        """
+        pts = bound.get_points()
+        collision = False
+        for pt in pts:
+            if self.contains(pt):
+                collision = True
+        return collision
+    
+    def get_points(self):
+        """
+        Get the points of the sphere
+        
+        :return: (list) list of points
+        """
+        return [self.center]
     
     
 class BoundHexPrism(BoundPoly):

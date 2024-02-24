@@ -174,7 +174,7 @@ class ArmPlanner(Planner):
                 is_found = False
                 for temp_flower in self._flowers:
                     # print(flower["position"], temp_flower["position"], np.sqrt(np.linalg.norm(np.array(flower["position"]) - np.array(temp_flower["position"]))))
-                    if np.linalg.norm(np.array(flower["position"]) - np.array(temp_flower["position"])) < 5e-2:
+                    if np.linalg.norm(np.array(flower["position"]) - np.array(temp_flower["position"])) < 1e-3:
                         is_found = True
                 if not is_found:
                     temp.append(flower)
@@ -187,7 +187,7 @@ class ArmPlanner(Planner):
             for flower in state["pollinated"][self._name]:
                 is_found = False
                 for temp_flower in self._pollinated:
-                    if np.linalg.norm(np.array(flower["position"]) - np.array(temp_flower["position"])) <= self._params["pollination_radius"]:
+                    if np.linalg.norm(np.array(flower["position"]) - np.array(temp_flower["position"])) <= 1e-3:#self._params["pollination_radius"]:
                         is_found = True
                 if not is_found:
                     temp.append(flower)
@@ -209,7 +209,8 @@ class GreedyArmPlanner(ArmPlanner):
         super(GreedyArmPlanner, self).__init__(name, params)
 
         self._log.debug("Init Stickbug Greedy Arm Planner")
-        self._pollination_time = 0        
+        self._pollination_time = 0   
+        self._target_joints = deepcopy(self._params["joint_rest"])
 
     
     def reinit(self, state = None, action = None, s_prime = None):
@@ -221,6 +222,18 @@ class GreedyArmPlanner(ArmPlanner):
         :param s_prime: (dict) dictionary of next state
         """
         raise NotImplementedError("reinit not implemented")
+    
+    def set_target(self, target):
+        self._target = target
+        self.set_state("3")
+        
+    def get_state(self):
+        return self._state
+    
+    def set_state(self, state):
+        self._state = state
+        if state != "1":
+            self._pollination_time = 0
         
     def evaluate(self, state):
         """
@@ -239,26 +252,27 @@ class GreedyArmPlanner(ArmPlanner):
             if not is_found:
                 unpollinated.append(flower["position"])
                     
-        print(self._name, "FLOWERS", len(self._flowers))
-        print(self._name, "POLLINATED", len(self._pollinated))
-        print(self._name, "UNPOLLINATED", len(unpollinated), unpollinated)
+        # print(self._name, "FLOWERS", len(self._flowers))
+        # print(self._name, "POLLINATED", len(self._pollinated))
+        # print(self._name, "UNPOLLINATED", len(unpollinated), unpollinated)
         action = {}
         
         reachable = []
         for flower in unpollinated:
             if self.constraints_satisfied(flower,state):
                 reachable.append(flower)
-        print(self._name, "REACHABLE", len(reachable), reachable)                  
+        # print(self._name, "REACHABLE", len(reachable), reachable) 
+        self.reachable = reachable                   
         #need to add case for when no flowers in reach
     
-        print(self._name, "Dist", np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target)))                                         
+        # print(self._name, "Dist", np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target)))                                         
         # level 3 competancy : go to closest flower position 
         if (self._state == "3" or self._state == "2") and np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target)) < self._params["pollination_radius"]:
             self._pollination_time = 0
             # if self._state == "3":
             self._state = "4"
             self._valid_goal = False
-            print("pollinate------------------------------------")
+            # print("pollinate------------------------------------")
             return {
                         "mode": "velocity", 
                         "is_joint": False,
@@ -270,7 +284,7 @@ class GreedyArmPlanner(ArmPlanner):
             self._pollination_time += state["time"]-self._time
         
         check_low = self._params["l3_timeout_low"] < self._pollination_time
-        print(self._name, "TIME", self._pollination_time, self._state, check_low)
+        # print(self._name, "TIME", self._pollination_time, self._state, check_low)
         check_high = self._pollination_time < self._params["l3_timeout"] and self._state != "3"    
         if (check_low or check_high) and len(reachable):# - np.random.randint(0,25):
             temp = deepcopy(self._target)
@@ -278,10 +292,10 @@ class GreedyArmPlanner(ArmPlanner):
             if np.linalg.norm(np.array(temp)-np.array(self._target)) > 1e-3:
                 self._pollination_time = 0
             # print("--->",self._target, state["arms"][self._name]["position"][0:3])
-            self._valid_goal = True #self.check_constraints(self._target,state)
+            self._valid_goal = True #self.constraints_satisfied(self._target,state)
             # if self._valid_goal == True:
             self._state = "3"
-            print(self._name, self._valid_goal, np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target)))
+            # print(self._name, self._valid_goal, np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target)))
         # elif self._state == "3":
         #     self._valid_goal = False       
         
@@ -289,7 +303,7 @@ class GreedyArmPlanner(ArmPlanner):
         check_dist = np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target)) < self._params["pollination_radius"] and self._state != "2"
         # level 2 competancy : go to a random flower position
         if check_dist or self._valid_goal == False:
-            print(self._name, " RANDO-----------------------------")
+            # print(self._name, " RANDO-----------------------------")
             if len(reachable):
                 self._target = random_point(state["arms"][self._name]["position"][0:3], reachable)
             # else:
@@ -299,7 +313,7 @@ class GreedyArmPlanner(ArmPlanner):
             #     ind = np.random.randint(0,1)
             #     self._target = deepcopy(state["arms"][self._name]["position"][0:3])
             #     self._target[ind] += s*0.1
-                self._valid_goal = True#self.check_constraints(self._target,state)
+                self._valid_goal = True#self.constraints_satisfied(self._target,state)
                 # if self._valid_goal == True:
                 self._pollination_time = 0
                 self._state = "2"
@@ -319,10 +333,10 @@ class GreedyArmPlanner(ArmPlanner):
         force = self.obav_force(self._params["force_constant"]*np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target)),state)
         if np.linalg.norm(force) > self._params["force_threshold"]:
             self._target = state["arms"][self._name]["position"][0:3] + force
-            self._valid_goal = self.check_constraints(self._target,state)
+            self._valid_goal = self.constraints_satisfied(self._target,state)
             if self._valid_goal == True:
                 self._state = "0"
-                print(force)
+                # print(force)
         
         self._time = state["time"]
         
@@ -343,7 +357,7 @@ class GreedyArmPlanner(ArmPlanner):
             l = np.linalg.norm(np.array(state["arms"][self._name]["position"][0:3]) - np.array(self._target))
             temp = np.linspace(state["arms"][self._name]["position"][0:3],self._target,int(np.ceil(10*l)))
             temp = temp[0]
-            if not self.check_constraints(temp,state):
+            if not self.constraints_satisfied(temp,state):
                 return {
                         "mode": "velocity", 
                         "is_joint": False,
@@ -375,7 +389,7 @@ class GreedyArmPlanner(ArmPlanner):
                 
         return repulsive_force
         
-    def check_constraints(self, point,state):
+    def constraints_satisfied(self, point,state):
         """
         Check if a point is within the joint constraints
         
@@ -405,6 +419,9 @@ class GreedyArmPlanner(ArmPlanner):
                 point[2] = np.clip(point[2],self._params["buffer"]+0.0001,self._params["support_height"]-self._params["buffer"]-0.0001)
                 z_max = np.min([el for el in pts if el >= point[2]])
                 z_min = np.max([el for el in pts if el <= point[2]])
+                
+        if np.linalg.norm(np.array(point[0:1]) - np.array(self._support[0:1])) > self._params["mem_length"]["bicep"] + self._params["mem_length"]["forearm"]:
+            return False
         
         pt = np.array(point)
         support = deepcopy(self._support[0:3])
@@ -425,7 +442,7 @@ class GreedyArmPlanner(ArmPlanner):
             if arm != self._name:
                 for bound in state["arms"][arm]["bounds"]:
                     if state["arms"][arm]["bounds"][bound].contains(angles):
-                        print("--------------COLLISION----------------")
+                        # print("--------------COLLISION----------------")
                         return False
         
         return valid_goal

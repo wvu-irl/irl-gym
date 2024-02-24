@@ -14,7 +14,7 @@
                 {
                     "num_arms": 6,
                     "selection_criterion": "random_point",
-                    "pollination_radius": 0.035,
+                    "pollination_radius": 0.025,
                     "force_constant": 0.01,
                     "force_threshold": 0.1,
                     "joint_rest": [-2.35, 2.35],
@@ -59,8 +59,13 @@
                     "base_referee": "density",
                     "arm_referee": "timed",
                     "conflict_threshold": 0.1,
-                    "conflict_timer": 5,
-                    "joint_rest": [-2.35, 2.35]
+                    "conflict_timer": 10,
+                    "joint_rest": [-2.35, 2.35],
+                    "base_pose": [1.35,-3.5,0,0],
+                    "reachable_area":
+                    {
+                        "min": [-2, -3.5, 0],
+                        "max": [2, 3.5, 2]}
                 }
             }
         }

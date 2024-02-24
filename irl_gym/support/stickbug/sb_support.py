@@ -144,7 +144,7 @@ class SBSupport:
                 temp_keys = [el for el in self._arms if "L" in el and el != key]
                 pts = [self._arms[el].get_absolute_state() for el in temp_keys]
                 pts = [el["position"][2] for el in pts]
-                pts.append(-self._params["buffer"])
+                pts.append(self._params["pose"]["left"][2]+self._params["buffer"])
                 pts.append(self._params["support_height"]-self._params["buffer"])
                 z = self._arms[key].get_absolute_state()["position"][2]
                 # print(pts, z)
@@ -158,7 +158,7 @@ class SBSupport:
                 temp_keys = [el for el in self._arms if "R" in el and el != key]
                 pts = [self._arms[el].get_absolute_state() for el in temp_keys]
                 pts = [el["position"][2] for el in pts]
-                pts.append(-self._params["buffer"])
+                pts.append(self._params["pose"]["right"][2]+self._params["buffer"])
                 pts.append(self._params["support_height"]-self._params["buffer"])
                 # print(pts, z)
                 z = self._arms[key].get_absolute_state()["position"][2]

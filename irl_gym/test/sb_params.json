@@ -157,7 +157,7 @@
                             "pollination_params":
                             {
                                 "type": "radius",
-                                "radius": 0.05,
+                                "radius": 0.03,
                                 "probability": 0.9,
                                 "log_level": "INFO"
                             }
