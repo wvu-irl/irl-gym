@@ -79,9 +79,9 @@ class GridWorldEnv(Env):
             params["log_level"] = logging.WARNING
         else:
             log_levels = {"NOTSET": logging.NOTSET, "DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING, "ERROR": logging.ERROR ,"CRITICAL": logging.CRITICAL}
-            params["log_level"] = log_levels[params["log_level"]]
+            ll = log_levels[params["log_level"]]
                                              
-        logging.basicConfig(stream=sys.stdout, format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s', level=params["log_level"])
+        logging.basicConfig(stream=sys.stdout, format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s', level=ll)
         self._log = logging.getLogger(__name__)
 
         self._log.debug("Init GridWorld")
@@ -270,45 +270,55 @@ class GridWorldEnv(Env):
         - red diamond: goal + agent
         - Grey cells: The darker the shade, the higher the reward
         """
-        # self._log.debug("Render " + self._params["render"])
-        # if self._params["render"] == "plot":
-        #     if self.window is None:
-        #         pygame.init()
-        #         pygame.display.init()
-        #         self.window = pygame.display.set_mode((self._params["dimensions"][0]*self._params["cell_size"], self._params["dimensions"][1]*self._params["cell_size"]))
-        #     if self.clock is None:
-        #         self.clock = pygame.time.Clock()
+        self._log.debug("Render " + self._params["render"])
+        if self._params["render"] == "plot":
+            if self.window is None:
+                pygame.init()
+                pygame.display.init()
+                self.window = pygame.display.set_mode((self._params["dimensions"][0]*self._params["cell_size"], self._params["dimensions"][1]*self._params["cell_size"]))
+            if self.clock is None:
+                self.clock = pygame.time.Clock()
             
-        #     img = pygame.Surface((self._params["dimensions"][0]*self._params["cell_size"], self._params["dimensions"][1]*self._params["cell_size"]))
-        #     img.fill((255,255,255))
+            img = pygame.Surface((self._params["dimensions"][0]*self._params["cell_size"], self._params["dimensions"][1]*self._params["cell_size"]))
+            img.fill((255,255,255))
 
-        #     # Reward
-        #     for i in range(self._params["dimensions"][0]):
-        #         for j in range(self._params["dimensions"][1]):
-        #             r = self.reward([],[],{"pose": [i,j]})
-        #             if r > 0:
-        #                 pygame.draw.rect(img, ((1-r)*255, (1-r)*255, (1-r)*255), pygame.Rect(i*self._params["cell_size"], j*self._params["cell_size"], self._params["cell_size"], self._params["cell_size"]))
+            # Reward
+            for i in range(self._params["dimensions"][0]):
+                for j in range(self._params["dimensions"][1]):
+                    r = self.reward([],[],{"pose": [i,j]})
+                    if r > 0:
+                        pygame.draw.rect(img, ((1-r)*255, (1-r)*255, (1-r)*255), pygame.Rect(i*self._params["cell_size"], j*self._params["cell_size"], self._params["cell_size"], self._params["cell_size"]))
             
-        #     # Agent, goal
-        #     if np.all(self._state["pose"] == self._params["goal"]):
-        #         pygame.draw.polygon(img, (255,0,0), self._goal_polygon)
-        #     else:
-        #         pygame.draw.circle(img, (0,0,255), (self._state["pose"]+0.5)*self._params["cell_size"], self._params["cell_size"]/2)
-        #         pygame.draw.polygon(img, (0,255,0), self._goal_polygon)
+            # Agent, goal
+            if np.all(self._state["pose"] == self._params["goal"]):
+                pygame.draw.polygon(img, (255,0,0), self._goal_polygon)
+            else:
+                pygame.draw.circle(img, (0,0,255), (self._state["pose"]+0.5)*self._params["cell_size"], self._params["cell_size"]/2)
+                pygame.draw.polygon(img, (0,255,0), self._goal_polygon)
             
-        #     for y in range(self._params["dimensions"][1]):
-        #         pygame.draw.line(img, 0, (0, self._params["cell_size"] * y), (self._params["cell_size"]*self._params["dimensions"][0], self._params["cell_size"] * y), width=2)
-        #     for x in range(self._params["dimensions"][0]):
-        #         pygame.draw.line(img, 0, (self._params["cell_size"] * x, 0), (self._params["cell_size"] * x, self._params["cell_size"]*self._params["dimensions"][1]), width=2)
+            for y in range(self._params["dimensions"][1]):
+                pygame.draw.line(img, 0, (0, self._params["cell_size"] * y), (self._params["cell_size"]*self._params["dimensions"][0], self._params["cell_size"] * y), width=2)
+            for x in range(self._params["dimensions"][0]):
+                pygame.draw.line(img, 0, (self._params["cell_size"] * x, 0), (self._params["cell_size"] * x, self._params["cell_size"]*self._params["dimensions"][1]), width=2)
                 
-        #     self.window.blit(img, img.get_rect())
-        #     pygame.event.pump()
-        #     pygame.display.update()
-        #     self.clock.tick(self.metadata["render_fps"])
+            self.window.blit(img, img.get_rect())
+            pygame.event.pump()
+            pygame.display.update()
+            self.clock.tick(self.metadata["render_fps"])
+            self.img = img
             
-        #     if self._params["save_frames"]:
-        #         pygame.image.save(img, self._params["prefix"] + "img" + str(self._img_count) + ".png")
-        #         self._img_count += 1
+            if self._params["save_frames"]:
+                pygame.image.save(img, self._params["prefix"] + "img" + str(self._img_count) + ".png")
+                self._img_count += 1
                 
-        # elif self._params["render"] == "print":
-        #     self._log.warning(str(self._state))
+        elif self._params["render"] == "print":
+            self._log.warning(str(self._state))
+
+    def get_image(self):
+        """
+        Gets images from render
+        
+        :return: (list) images
+        """
+        self._log.debug("Get Images")
+        return self.img

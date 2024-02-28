@@ -59,7 +59,7 @@
                     "base_referee": "density",
                     "arm_referee": "timed",
                     "conflict_threshold": 0.1,
-                    "conflict_timer": 10,
+                    "conflict_timer": 15,
                     "joint_rest": [-2.35, 2.35],
                     "base_pose": [1.35,-3.5,0,0],
                     "reachable_area":

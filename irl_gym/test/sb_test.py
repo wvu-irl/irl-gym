@@ -36,8 +36,9 @@ s, _ = env.reset()
 
 plan_params = json.load(open(current+'/other_stickbug/sb_plan_params.json'))
 # print(plan_params["algs"][0]["params"])
-planner = RefereePlanner(plan_params["algs"][0]["params"])
+# planner = RefereePlanner(plan_params["algs"][0]["params"])
 # planner = NaivePlanner(plan_params["algs"][0]["params"])
+planner = RandomRefereePlanner(plan_params["algs"][0]["params"])
 # planner = HungarianPlanner(plan_params["algs"][0]["params"])
 # need to check pollination to see if it gets updated as pollinated in the orchard
 
@@ -56,11 +57,11 @@ while not done and plt.fignum_exists(env.get_fignum()):
     # print(s)
     a = planner.evaluate(s)
     
-    for arm in a["arms"]:
-        if not a["arms"][arm]["is_joint"]:
-            print(arm, a["arms"][arm]["pollinate"], np.linalg.norm(np.array(a["arms"][arm]["command"][0:3]) - np.array(s["arms"][arm]["position"][0:3])))
-        print(a["arms"][arm]["command"])
-        print(s["arms"][arm]["position"])
+    # for arm in a["arms"]:
+    #     if not a["arms"][arm]["is_joint"]:
+    #         print(arm, a["arms"][arm]["pollinate"], np.linalg.norm(np.array(a["arms"][arm]["command"][0:3]) - np.array(s["arms"][arm]["position"][0:3])))
+    #     print(a["arms"][arm]["command"])
+    #     print(s["arms"][arm]["position"])
     s, r, done, is_trunc, _ = env.step(a)
     # for arm in a["arms"]:
     #     if "pollinate" in a["arms"][arm] and a["arms"][arm]["pollinate"]:
@@ -73,6 +74,7 @@ while not done and plt.fignum_exists(env.get_fignum()):
     plt.pause(0.5)
 
     print(_)
+    print("---------------",planner.get_num_conflicts(),"------------")
     # print(env.get_actions(s))
     
     done = done or is_trunc

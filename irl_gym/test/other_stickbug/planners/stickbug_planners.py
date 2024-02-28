@@ -26,7 +26,7 @@ from irl_gym.test.other_stickbug.planners.arm_planners import MultiArmPlanner
 from irl_gym.test.other_stickbug.planners.base_planners import BasePlanner
 from irl_gym.test.other_stickbug.planners.plan_utils import *
 
-__all__ = ["StickbugPlanner", "RefereePlanner", "HungarianPlanner", "NaivePlanner"]
+__all__ = ["StickbugPlanner", "RefereePlanner", "HungarianPlanner", "NaivePlanner", "RandomRefereePlanner"]
 
 class StickbugPlanner(Planner):
     """
@@ -265,6 +265,222 @@ class HungarianPlanner(StickbugPlanner):
         
         return action
           
+class RandomRefereePlanner(StickbugPlanner):
+    """
+    Planning using the referee to handle conflicts
+    
+    :param arbitration_params: (dict) dictionary of arbitration parameters
+    - :param base_referee: (str) type of arbitration for base
+    - :param arm_referee: (str) type of arbitration for arm
+    - :param reach: (float) distance to consider in reach
+    :param base_params: (dict) dictionary of base parameters
+    :param arm_params: (dict) dictionary of arm parameters
+    
+    :param log_level: (int) logging levels
+    """
+    def __init__(self, params=None):
+        super(RandomRefereePlanner, self).__init__(params)
+        
+        self._log.debug("Init Referee Planner")
+        
+        self._flowers = []
+        self._pollinated = []
+        self._conflict = {}
+        self._conflict_timers = {}
+        self._num_conflicts = {"interaction":0, "flower_assignment":0, "no_flowers":0, "total":0}
+        
+    def reinit(self, state=None, action=None, s_prime=None):
+        """
+        Reinitialize Planners
+        
+        :param state: (dict) dictionary of state
+        :param action: (dict) dictionary of action
+        :param s_prime: (dict) dictionary of next state
+        """
+        raise NotImplementedError("reinit not implemented")
+        # reset the planners being refereed. Maybe reinitialize?
+        
+    def evaluate(self, state):
+        """
+        Planners for base and arms with referee interefering to limit actions
+        
+        :param state: (dict) dictionary of state
+        """
+        state = deepcopy(state)
+                
+        for arm in state["flowers"]:
+            if len(self._flowers) == 0:
+                self._flowers = deepcopy(state["flowers"][arm])
+            else:
+                temp = deepcopy(self._flowers)
+                for flower in state["flowers"][arm]:
+                    is_found = False
+                    for temp_flower in self._flowers:
+                        if np.linalg.norm(np.array(flower["position"]) - np.array(temp_flower["position"])) < 1e-3:
+                            is_found = True
+                    if not is_found:
+                        temp.append(flower)
+                self._flowers = temp
+        
+        for arm in state["pollinated"]:
+            if len(self._pollinated) == 0:
+                if len(state["pollinated"][arm]) > 0:
+                    self._pollinated.append(deepcopy(state["pollinated"][arm]))
+            elif len(state["pollinated"][arm]) > 0:
+                temp = deepcopy(self._pollinated)
+                is_found = False
+                # print(self._pollinated)
+                for temp_flower in self._pollinated:
+                    # print(state["pollinated"][arm])
+                    if np.linalg.norm(np.array(state["pollinated"][arm]["position"]) - np.array(temp_flower["position"])) <= 1e-3:
+                        is_found = True
+                if not is_found:
+                    temp.append(state["pollinated"][arm])
+                self._pollinated = temp
+        
+        temp_flow = []
+        for flower in self._flowers:
+            temp_flow.append(flower["position"])
+        # print("FLOWERS", temp_flow)
+        
+        temp_pol = []
+        for flower in self._pollinated:
+            temp_pol.append(flower["position"])
+        # print("POLLINATED ALL", temp_pol)
+        
+        # share pollinated flowers
+        for arm in state["pollinated"]:
+            state["pollinated"][arm] = deepcopy(self._pollinated)
+        
+        action = {}
+        # action["base"] = self._base_planner.evaluate(state["base"]) # base                
+        # action["arms"] = self._arm_planner.evaluate(state) # arm  
+        names = []
+        arms = []
+        
+        for arm in state["arms"]:
+            names.append(arm)
+            arms.append(state["arms"][arm]["position"][0:3])
+            
+        unpollinated = []
+        unpol_orientation = []
+        pol_found = []
+        for flower in self._flowers:
+            is_found = False
+            for pol in self._pollinated:
+                if np.linalg.norm(np.array(flower["position"]) - np.array(pol["position"])) <= self._arm_params["pollination_radius"]*5/3.5:
+                    is_found = True
+            if not is_found:
+                unpollinated.append(flower["position"])
+                unpol_orientation.append(flower["orientation"])
+            else:
+                pol_found.append(flower["position"])
+        
+        # print("UNPOLLINATED", len(unpollinated), unpollinated)
+        # print("POLLINATED F", len(pol_found), pol_found)
+        
+        # arm_keys = list(self._targets.keys())
+        # for arm in arm_keys:
+        #     if np.linalg.norm(np.array(state["arms"][arm]["position"][0:3]) - np.array(self._targets[arm])) <= self._arm_params["pollination_radius"]:
+        #         del self._targets[arm]
+        
+        
+        action = {"arms":{}}
+        # action["base"] = self._base_planner.evaluate(state["base"]) # base
+        action["arms"] = self._arm_planner.evaluate(state) # arm
+        
+        prev_conflicts = deepcopy(self._conflict)
+        nonconflict = list(set(names)-set(self._conflict.keys()))
+        for arm in nonconflict:
+            temp_arm = self._arm_planner.get_arm(arm)
+            flower_check = not len(temp_arm.reachable) and temp_arm.get_state() != "3"
+
+            conflict_check = True
+            for arm2 in state["arms"]:
+                if arm != arm2:
+                    for bd in state["arms"][arm]["bounds"]:
+                        bound = state["arms"][arm]["bounds"][bd]
+                        for bd2 in state["arms"][arm2]["bounds"]:
+                            if bound.collision(state["arms"][arm2]["bounds"][bd2]):
+                                conflict_check = False
+                                joints = deepcopy(self._arm_params["joint_rest"])
+                                if "R" in arm:
+                                    joints[0] *= -1
+                                    joints[1] *= -1
+                                z = deepcopy(state["arms"][arm]["position"][2])
+                                if state["arms"][arm]["position"][2] > state["arms"][arm2]["position"][2]:
+                                    z += 0.3
+                                else:
+                                    z -= 0.3
+                                action["arms"][arm] = {"mode": "position", "is_joint": True, "command": [0,0,z] + joints + [0,0], "pollinate": False, "is_relative": False}
+                                self._conflict_timers[arm] = 0
+                                self._conflict[arm] = action["arms"][arm]
+                                self._num_conflicts["interaction"] += 1
+                                                          
+            if flower_check and conflict_check:
+                in_hung = False
+                if len(unpollinated):
+                    hung_sln = hungarian_assignment(arms, unpollinated)
+                    for el in hung_sln:
+                        if arms[el[0]] == arm:
+                            target = unpollinated[el[1]]
+                            action["arms"][arm] = {"mode": "position", "is_joint": False, "command": list(target) + [0,0,0,0], "pollinate": False, "is_relative": False}
+                            temp_arm.set_target(target)
+                            self._conflict_timers[arm] = 0
+                            self._conflict[arm] = action["arms"][arm]
+                            in_hung = True
+                            self._num_conflicts["flower_assignment"] += 1
+                if not len(unpollinated) or not in_hung:
+                    points = []
+                    for arm2 in state["arms"]:
+                        if ("L" in arm and "L" in arm2) or ("R" in arm and "R" in arm2):
+                            points.append(state["arms"][arm2]["position"][2])
+                    z_min = self._arbitration_params["base_pose"][2]+ self._arm_params["base_height"] + self._arm_params["support_offset"][2] + self._arm_params["buffer"]
+                    z_max = z_min + self._arm_params["support_height"] - 2*self._arm_params["buffer"]
+                    points.append(z_min)
+                    points.append(z_max)
+                    z = np.clip(state["arms"][arm]["position"][2], z_min+0.001, z_max-0.001)
+                    z_min = np.max([el for el in points if el <= z])
+                    z_max = np.min([el for el in points if el >= z])
+                    z = np.random.uniform(z_min, z_max)
+                    th1 = np.random.uniform(self._arm_params["joint_constraints"]["th1"]["min"], 0)
+                    th2 = np.random.uniform(0, self._arm_params["joint_constraints"]["th2"]["max"])
+                    if "R" in arm:
+                        th1 *= -1
+                        th2 *= -1
+                    action["arms"][arm] = {"mode": "position", "is_joint": True, "command": [0,0,z,th1,th2,0,0], "pollinate": False, "is_relative": False}
+                    self._conflict_timers[arm] = 0
+                    self._conflict[arm] = action["arms"][arm]
+                    self._num_conflicts["no_flowers"] += 1
+            # elif flower_check and conflict_check:
+            #     joints = deepcopy(self._arm_params["joint_rest"])
+            #     if "R" in arm:
+            #         joints[0] *= -1
+            #         joints[1] *= -1
+            #     action["arms"][arm] = {"mode": "position", "is_joint": True, "command": [0,0,state["arms"][arm]["position"][2]] + joints + [0,0], "pollinate": False, "is_relative": False}
+            #     temp_arm.set_state("1")
+            #     self._conflict_timers[arm] = 0
+            #     self._conflict[arm] = action["arms"][arm]
+                
+        arm_keys = list(self._conflict.keys())
+        for arm in arm_keys:
+            if self._conflict_timers[arm] > self._arbitration_params["conflict_timer"]:
+                self._conflict_timers[arm] = 0
+                del self._conflict[arm]
+            else:
+                action["arms"][arm] = self._conflict[arm]
+                self._conflict_timers[arm] += 1
+        
+        for arm in self._conflict:
+            if arm not in prev_conflicts:
+                self._num_conflicts["total"] += 1
+            elif np.linalg.norm(np.array(prev_conflicts[arm]["command"])- np.array(self._conflict[arm]["command"])) > 1e-3:
+                self._num_conflicts["total"] += 1
+        
+        return action 
+    
+    def get_num_conflicts(self):
+        return self._num_conflicts    
     
     #will need to include memory for intereference actions
 class RefereePlanner(StickbugPlanner):

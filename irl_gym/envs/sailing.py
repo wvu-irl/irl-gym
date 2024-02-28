@@ -99,9 +99,9 @@ class SailingEnv(Env):
             params["log_level"] = logging.WARNING
         else:
             log_levels = {"NOTSET": logging.NOTSET, "DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING, "ERROR": logging.ERROR ,"CRITICAL": logging.CRITICAL}
-            params["log_level"] = log_levels[params["log_level"]]
+            ll = log_levels[params["log_level"]]
                                              
-        logging.basicConfig(stream=sys.stdout, format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s', level=params["log_level"])
+        logging.basicConfig(stream=sys.stdout, format='[%(asctime)s] {%(filename)s:%(lineno)d} %(levelname)s - %(message)s', level=ll)
         self._log = logging.getLogger(__name__)
         
         self._log.debug("Init Sailing")

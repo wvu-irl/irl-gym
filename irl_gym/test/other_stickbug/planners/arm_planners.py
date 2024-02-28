@@ -57,6 +57,7 @@ class MultiArmPlanner(Planner):
             else:
                 l_arm = params["num_arms"] // 2
                 r_arm = params["num_arms"] // 2
+            # print(l_arm, r_arm)
                 
             for i in range(l_arm):
                 self._arm_names.append(naming[i]+"L")

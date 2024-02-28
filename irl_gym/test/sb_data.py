@@ -36,18 +36,18 @@ params = json.load(open(current+'/sb_params.json'))
 params = params["envs"][0]
 plan_params = json.load(open(current+'/other_stickbug/sb_plan_params.json'))
 
-mode = "hungarian"
+mode = "referee"
 
-save_path = current + "/" + mode + "_data.csv"
+save_path = current + "/" + mode + str(params["params"]["support"]["num_arms"]) + "_data3.csv"
 print(save_path)
 
 results = pd.DataFrame()
 
-num_trials = 1000
-i = 0
+num_trials = 750
+i = 589
 total = 0
 while i < num_trials and total < 10000:
-    print(i)
+    print(i, mode, params["params"]["support"]["num_arms"])
     env = gym.make("irl_gym/StickbugEnv-v0", max_episode_steps=params["max_episode_steps"], params=params["params"])
     s, _ = env.reset()
     if mode == "naive":
@@ -55,15 +55,15 @@ while i < num_trials and total < 10000:
     elif mode == "hungarian":
         planner = HungarianPlanner(plan_params["algs"][0]["params"])
     elif mode == "referee":
-        planner = RefereePlanner(plan_params["algs"][0]["params"])
+        planner = RandomRefereePlanner(plan_params["algs"][0]["params"])
     done = False
     
     try:
-        result = {"alg": mode, "trial": i}
+        result = {"alg": mode, "trial": i, "num_arms": params["params"]["support"]["num_arms"]}
         time = [0]*params["max_episode_steps"]
         num_pollinated = [0]*params["max_episode_steps"]
         j = 0
-        while not done and plt.fignum_exists(env.get_fignum()):
+        while not done:# and plt.fignum_exists(env.get_fignum()):
 
             a = planner.evaluate(s)
             s, r, done, is_trunc, info = env.step(a)
@@ -78,10 +78,14 @@ while i < num_trials and total < 10000:
             for k in range(j, params["max_episode_steps"]):
                 time[k] = time[j-1]
                 num_pollinated[k] = num_pollinated[j-1]
-        print(info)
         result["time"] = time
         result["num_pollinated"] = num_pollinated
-        
+        num_conflicts = planner.get_num_conflicts()
+        result["total_conflicts"] = num_conflicts["total"]
+        result["inter_arm_conflicts"] = num_conflicts["interaction"]
+        result["flower_assignment_conflicts"] = num_conflicts["flower_assignment"]
+        result["no_flowers_conflicts"] = num_conflicts["no_flowers"]
+
         results = pd.concat([results, pd.DataFrame(result)])
         data = import_file(save_path)
         data = pd.concat([data, pd.DataFrame(result)])

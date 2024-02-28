@@ -215,6 +215,7 @@ class StickbugEnv(Env):
             self._ax = Axes3D(self._fig, auto_add_to_figure=False)
             self._fig.add_axes(self._ax)
             self._fn = self._fig.number
+            print("Figure on")
           
         # self.observation_space = spaces.discrete.Discrete(4)
         # self.action_space = spaces.Dict(
