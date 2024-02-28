@@ -39,6 +39,17 @@ from sklearn.gaussian_process.kernels import RBF, ConstantKernel as C
 
 # exit()
 
+# files = ["hungarian6", "naive6"]
+# for file in files:
+#     save_path = current + "/" + file + "_data.csv"
+#     data = import_file(save_path)
+#     data["num_arms"] = 6
+    
+#     save_path = current + "/" + file + "_data_new.csv"
+#     export_file(data, save_path)
+
+# exit()
+
 num = [1,2,4,6]
 modes = ["naive", "hungarian", "referee"]
 naive_data = pd.DataFrame()
