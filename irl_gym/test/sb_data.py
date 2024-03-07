@@ -38,13 +38,13 @@ plan_params = json.load(open(current+'/other_stickbug/sb_plan_params.json'))
 
 mode = "referee"
 
-save_path = current + "/" + mode + str(params["params"]["support"]["num_arms"]) + "_data.csv"
+save_path = current + "/" + mode + str(params["params"]["support"]["num_arms"]) + "_data1.csv"
 print(save_path)
 
 results = pd.DataFrame()
 
-num_trials = 1000
-i = 634
+num_trials = 250
+i = 204
 total = 0
 while i < num_trials and total < 10000:
     print(i, mode, params["params"]["support"]["num_arms"])

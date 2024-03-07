@@ -59,7 +59,7 @@
                     },
                     "buffer": 0.035,
                     "support_height": 2,
-                    "num_arms": 2,
+                    "num_arms": 6,
                     "mem_length":
                     {
                         "bicep": 0.2,

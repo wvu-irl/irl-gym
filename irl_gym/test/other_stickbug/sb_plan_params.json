@@ -12,7 +12,7 @@
                 },
                 "arm_params":
                 {
-                    "num_arms": 2,
+                    "num_arms": 6,
                     "selection_criterion": "random_point",
                     "pollination_radius": 0.025,
                     "force_constant": 0.01,
