@@ -318,7 +318,7 @@ for arm in num:
     data_list.append(ref[arm]["inter_arm_conflicts"])
     
 f, ax = plt.subplots()
-bp =ax.boxplot(data_list, patch_artist=True)
+bp =ax.boxplot(data_list, patch_artist=True, whis=10)
 ax.set_xticklabels(num)
 plt.savefig(current + "/inter_arm_conflict.png")
 
@@ -328,7 +328,7 @@ for arm in num:
     data_list.append(ref[arm]["flower_assignment_conflicts"])
 
 f, ax = plt.subplots()
-bp =ax.boxplot(data_list, patch_artist=True)
+bp =ax.boxplot(data_list, patch_artist=True, whis=2)
 ax.set_xticklabels(num)
 plt.savefig(current + "/flower_assignment_conflict.png")
 
@@ -338,6 +338,6 @@ for arm in num:
     data_list.append(ref[arm]["no_flowers_conflicts"])
 
 f, ax = plt.subplots()
-bp = ax.boxplot(data_list, patch_artist=True)
+bp = ax.boxplot(data_list, patch_artist=True, whis=4)
 ax.set_xticklabels(num)
 plt.savefig(current + "/no_flowers_conflict.png")
